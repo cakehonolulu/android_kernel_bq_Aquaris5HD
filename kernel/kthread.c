@@ -384,7 +384,7 @@ static void insert_kthread_work(struct kthread_worker *worker,
 	lockdep_assert_held(&worker->lock);
 
 	list_add_tail(&work->node, pos);
-	work->queue_seq++;
+	work->worker = worker;
 	if (likely(worker->task))
 		wake_up_process(worker->task);
 }
@@ -459,7 +459,6 @@ retry:
 	else
 		noop = true;
 
-<<<<<<< HEAD
 	spin_unlock_irq(&worker->lock);
 
 	if (!noop)
