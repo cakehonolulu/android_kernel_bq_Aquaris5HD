@@ -5468,15 +5468,6 @@ static void migrate_tasks(unsigned int dead_cpu)
 	 */
 	rq->stop = NULL;
 
-	/*
-	  * Ensure rt_rq is not throttled so its threads can be migrated using
-	  * pick_next_task_rt
-	  */
-	unthrottle_offline_rt_rqs(rq);
-	
-	/* Ensure any throttled groups are reachable by pick_next_task */
-	unthrottle_offline_cfs_rqs(rq);
-
 	for ( ; ; ) {
 		/*
 		 * There's this thread running, bail when that's the only
