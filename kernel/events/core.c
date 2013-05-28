@@ -3585,14 +3585,15 @@ static struct ring_buffer *ring_buffer_get(struct perf_event *event)
 	return rb;
 }
 
-static void ring_buffer_put(struct ring_buffer *rb)
+static bool ring_buffer_put(struct ring_buffer *rb)
 {
 	if (!atomic_dec_and_test(&rb->refcount))
-		return;
+		return false;
 
 	WARN_ON_ONCE(!list_empty(&rb->event_list));
 
 	call_rcu(&rb->rcu_head, rb_free_rcu);
+	return true;
 }
 
 static void perf_mmap_open(struct vm_area_struct *vma)
@@ -3614,6 +3615,7 @@ static void perf_mmap_open(struct vm_area_struct *vma)
 static void perf_mmap_close(struct vm_area_struct *vma)
 {
 	struct perf_event *event = vma->vm_file->private_data;
+
 
 	struct ring_buffer *rb = event->rb;
 	struct user_struct *mmap_user = rb->mmap_user;
@@ -3669,6 +3671,7 @@ again:
 			ring_buffer_detach(event, rb);
 			ring_buffer_put(rb); /* can't be last, we still have one */
 		}
+
 		mutex_unlock(&event->mmap_mutex);
 		put_event(event);
 
@@ -3677,6 +3680,7 @@ again:
 		 * destroyed its integrity by doing a deletion.
 		 */
 		goto again;
+
 	}
 	rcu_read_unlock();
 
@@ -3803,6 +3807,7 @@ again:
 	}
 
 	atomic_set(&rb->mmap_count, 1);
+
 	rb->mmap_locked = extra;
 	rb->mmap_user = get_current_user();
 
@@ -3810,6 +3815,7 @@ again:
 	vma->vm_mm->pinned_vm += extra;
 
 	ring_buffer_attach(event, rb);
+
 	rcu_assign_pointer(event->rb, rb);
 
 	perf_event_update_userpage(event);
