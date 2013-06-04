@@ -3585,15 +3585,14 @@ static struct ring_buffer *ring_buffer_get(struct perf_event *event)
 	return rb;
 }
 
-static bool ring_buffer_put(struct ring_buffer *rb)
+static void ring_buffer_put(struct ring_buffer *rb)
 {
 	if (!atomic_dec_and_test(&rb->refcount))
-		return false;
+		return;
 
 	WARN_ON_ONCE(!list_empty(&rb->event_list));
 
 	call_rcu(&rb->rcu_head, rb_free_rcu);
-	return true;
 }
 
 static void perf_mmap_open(struct vm_area_struct *vma)
@@ -3615,7 +3614,6 @@ static void perf_mmap_open(struct vm_area_struct *vma)
 static void perf_mmap_close(struct vm_area_struct *vma)
 {
 	struct perf_event *event = vma->vm_file->private_data;
-
 
 	struct ring_buffer *rb = event->rb;
 	struct user_struct *mmap_user = rb->mmap_user;
