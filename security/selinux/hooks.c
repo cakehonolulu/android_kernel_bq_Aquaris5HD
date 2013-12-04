@@ -4884,6 +4884,7 @@ static unsigned int selinux_ip_postroute(struct sk_buff *skb, int ifindex,
 		struct sk_security_struct *sksec = sk->sk_security;
 		if (selinux_skb_peerlbl_sid(skb, family, &skb_sid))
 			return NF_DROP;
+
 		/* At this point, if the returned skb peerlbl is SECSID_NULL
 		 * and the packet has been through at least one XFRM
 		 * transformation then we must be dealing with the "final"
@@ -4903,6 +4904,7 @@ static unsigned int selinux_ip_postroute(struct sk_buff *skb, int ifindex,
 				return NF_DROP_ERR(-ECONNREFUSED);
 			}
 		}
+
 		if (selinux_conn_sid(sksec->sid, skb_sid, &peer_sid))
 			return NF_DROP;
 		secmark_perm = PACKET__SEND;
