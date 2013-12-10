@@ -4885,26 +4885,6 @@ static unsigned int selinux_ip_postroute(struct sk_buff *skb, int ifindex,
 		if (selinux_skb_peerlbl_sid(skb, family, &skb_sid))
 			return NF_DROP;
 
-		/* At this point, if the returned skb peerlbl is SECSID_NULL
-		 * and the packet has been through at least one XFRM
-		 * transformation then we must be dealing with the "final"
-		 * form of labeled IPsec packet; since we've already applied
-		 * all of our access controls on this packet we can safely
-		 * pass the packet. */
-		if (skb_sid == SECSID_NULL) {
-			switch (family) {
-			case PF_INET:
-				if (IPCB(skb)->flags & IPSKB_XFRM_TRANSFORMED)
-					return NF_ACCEPT;
-				break;
-			case PF_INET6:
-				if (IP6CB(skb)->flags & IP6SKB_XFRM_TRANSFORMED)
-					return NF_ACCEPT;
-			default:
-				return NF_DROP_ERR(-ECONNREFUSED);
-			}
-		}
-
 		if (selinux_conn_sid(sksec->sid, skb_sid, &peer_sid))
 			return NF_DROP;
 		secmark_perm = PACKET__SEND;
