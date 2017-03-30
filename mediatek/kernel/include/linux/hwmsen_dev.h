@@ -71,5 +71,9 @@ extern int hwmsen_gsensor_add(struct sensor_init_info* obj) ;
 #if defined(MTK_AUTO_DETECT_MAGNETOMETER)
 extern int hwmsen_msensor_add(struct sensor_init_info* obj);
 #endif
+
+#if defined(MTK_AUTO_DETECT_ALSPS)
+extern int hwmsen_alsps_sensor_add(struct sensor_init_info* obj);
+#endif
 /*----------------------------------------------------------------------------*/
 #endif 
