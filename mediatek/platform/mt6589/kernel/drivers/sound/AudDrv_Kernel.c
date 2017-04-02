@@ -105,7 +105,7 @@
 
 #include "yusu_android_speaker.h"
 #if defined(CONFIG_MTK_COMBO) || defined(CONFIG_MTK_COMBO_MODULE)
-#include <mach/mt_combo.h>
+#include <mach/mtk_wcn_cmb_stub.h>
 #endif
 
 #if defined(MTK_MT5192) || defined(MTK_MT5193)
@@ -130,6 +130,10 @@ extern int cust_matv_gpio_off(void);
 
 #define AFE_INT_TIMEOUT       (10)
 #define AFE_UL_TIMEOUT       (10)
+#ifdef MTK_3MIC_SUPPORT
+// add for 3 mic switch enable , GPIO is not fixed
+#define  GPIO_MIC_ANALOGSWITCH_EN (116)
+#endif
 
 /*****************************************************************************
 *           V A R I A B L E     D E L A R A T I O N
@@ -2443,26 +2447,30 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 #if defined(CONFIG_MTK_COMBO) || defined(CONFIG_MTK_COMBO_MODULE)
         case AUDDRV_RESET_BT_FM_GPIO:
         {
-            PRINTK_AUDDRV("!! AudDrv, BT OFF, Analog FM, COMBO_AUDIO_STATE_1 \n");
-            mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_0);
+            PRINTK_AUDDRV("!! AudDrv, BT OFF, Analog FM, COMBO_AUDIO_STATE_0 \n");
+            //mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_0);
+            mtk_wcn_cmb_stub_audio_ctrl((CMB_STUB_AIF_X)CMB_STUB_AIF_0);
             break;
         }
         case AUDDRV_SET_BT_PCM_GPIO:
         {
             PRINTK_AUDDRV("!! AudDrv, BT ON, Analog FM, COMBO_AUDIO_STATE_1 \n");
-            mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_1);
+            //mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_1);
+            mtk_wcn_cmb_stub_audio_ctrl((CMB_STUB_AIF_X)CMB_STUB_AIF_1);
             break;
         }
         case AUDDRV_SET_FM_I2S_GPIO:
         {
             PRINTK_AUDDRV("!! AudDrv, BT OFF, Digital FM, COMBO_AUDIO_STATE_2 \n");
-            mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_2);
+            //mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_2);
+            mtk_wcn_cmb_stub_audio_ctrl((CMB_STUB_AIF_X)CMB_STUB_AIF_2);
             break;
         }
 		  case AUDDRV_SET_BT_FM_GPIO:
 		  {
 			  PRINTK_AUDDRV("!! AudDrv, BT ON, Digital FM, COMBO_AUDIO_STATE_3 \n");
-			  mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_3);
+            //mt_combo_audio_ctrl((COMBO_AUDIO_STATE)COMBO_AUDIO_STATE_3);
+            mtk_wcn_cmb_stub_audio_ctrl((CMB_STUB_AIF_X)CMB_STUB_AIF_3);
 			  break;
 		  }
         case AUDDRV_RESET_FMCHIP_MERGEIF:
@@ -2470,50 +2478,50 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
             int i, j;
             PRINTK_AUDDRV("!! AudDrv, +RESET FM Chip MergeIF\n");
 
-            mt_set_gpio_mode(GPIO221, GPIO_MODE_00);//clk
-            mt_set_gpio_mode(GPIO222, GPIO_MODE_00);//sync
-            mt_set_gpio_mode(GPIO223, GPIO_MODE_00);
-            mt_set_gpio_mode(GPIO224, GPIO_MODE_00);
+            mt_set_gpio_mode(GPIO_COMBO_I2S_CK_PIN, GPIO_MODE_00);//clk
+            mt_set_gpio_mode(GPIO_COMBO_I2S_WS_PIN, GPIO_MODE_00);//sync
+            mt_set_gpio_mode(GPIO_COMBO_I2S_DAT_PIN, GPIO_MODE_00);
+            mt_set_gpio_mode(GPIO_PCM_DAIPCMOUT_PIN, GPIO_MODE_00);
 
-            mt_set_gpio_dir(GPIO221, GPIO_DIR_OUT); //output
-            mt_set_gpio_dir(GPIO222, GPIO_DIR_OUT); //output
-            mt_set_gpio_dir(GPIO223, GPIO_DIR_IN); //input
-            mt_set_gpio_dir(GPIO224, GPIO_DIR_OUT); //output
+            mt_set_gpio_dir(GPIO_COMBO_I2S_CK_PIN, GPIO_DIR_OUT); //output
+            mt_set_gpio_dir(GPIO_COMBO_I2S_WS_PIN, GPIO_DIR_OUT); //output
+            mt_set_gpio_dir(GPIO_COMBO_I2S_DAT_PIN, GPIO_DIR_IN); //input
+            mt_set_gpio_dir(GPIO_PCM_DAIPCMOUT_PIN, GPIO_DIR_OUT); //output
 
-            mt_set_gpio_out(GPIO222, GPIO_OUT_ZERO);//sync
-            mt_set_gpio_out(GPIO221, GPIO_OUT_ZERO);//clock
+            mt_set_gpio_out(GPIO_COMBO_I2S_WS_PIN, GPIO_OUT_ZERO);//sync
+            mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ZERO);//clock
             ndelay(170);//delay 170ns
             for (j=0; j<3; j++)
             {
                 //-- gen sync
-                mt_set_gpio_out(GPIO222, GPIO_OUT_ONE);//sync
+                mt_set_gpio_out(GPIO_COMBO_I2S_WS_PIN, GPIO_OUT_ONE);//sync
                 ndelay(170);//delay 170ns
 
-                mt_set_gpio_out(GPIO221, GPIO_OUT_ONE);//clock
+                mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ONE);//clock
                 ndelay(170);//delay 170ns
-                mt_set_gpio_out(GPIO221, GPIO_OUT_ZERO);//clock
+                mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ZERO);//clock
                 ndelay(170);//delay 170ns
-                mt_set_gpio_out(GPIO222, GPIO_OUT_ZERO);//sync
+                mt_set_gpio_out(GPIO_COMBO_I2S_WS_PIN, GPIO_OUT_ZERO);//sync
                 ndelay(170);//delay 170ns
 
                 //-- send 56 clock to change state
                 for (i=0; i<56; i++)
                 {
-                    mt_set_gpio_out(GPIO221, GPIO_OUT_ONE);//clock
+                    mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ONE);//clock
                     ndelay(170);//delay 170ns
-                    mt_set_gpio_out(GPIO221, GPIO_OUT_ZERO);//clock
+                    mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ZERO);//clock
                     ndelay(170);//delay 170ns
                 }
             }
 
             //-- gen sync
-            mt_set_gpio_out(GPIO222, GPIO_OUT_ONE);//sync
+            mt_set_gpio_out(GPIO_COMBO_I2S_WS_PIN, GPIO_OUT_ONE);//sync
             ndelay(170);//delay 170ns
-            mt_set_gpio_out(GPIO221, GPIO_OUT_ONE);//clock
+            mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ONE);//clock
             ndelay(170);//delay 170ns
-            mt_set_gpio_out(GPIO221, GPIO_OUT_ZERO);//clock
+            mt_set_gpio_out(GPIO_COMBO_I2S_CK_PIN, GPIO_OUT_ZERO);//clock
             ndelay(170);//delay 170ns
-            mt_set_gpio_out(GPIO222, GPIO_OUT_ZERO);//sync
+            mt_set_gpio_out(GPIO_COMBO_I2S_WS_PIN, GPIO_OUT_ZERO);//sync
             PRINTK_AUDDRV("!! AudDrv, -RESET FM Chip MergeIF\n");
             break;
         }
