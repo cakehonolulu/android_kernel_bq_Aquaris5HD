@@ -65,6 +65,8 @@
 #define WMT_HIF_UART_INFO_LEN   (4)
 #define WMT_FUNC_CTRL_PARAM_LEN (1)
 
+#define WMT_LPBK_CMD_LEN        (5)
+#define WMT_LPBK_BUF_LEN        (1024+WMT_LPBK_CMD_LEN)
 #define WMT_DEFAULT_BAUD_RATE   (115200)
 
 #define INIT_CMD(c, e, s) {.cmd= c, .cmdSz=sizeof(c), .evt=e, .evtSz=sizeof(e), .str=s}
@@ -136,6 +138,8 @@ typedef enum _ENUM_WMT_OPID_T {
     WMT_OPID_SDIO_CTRL = 18,
     WMT_OPID_FW_COREDMP = 19,
     WMT_OPID_GPIO_STATE = 20,
+	WMT_OPID_ANT_RAM_DOWN = 21,
+    WMT_OPID_ANT_RAM_STA_GET = 22,
     WMT_OPID_MAX
 } ENUM_WMT_OPID_T, *P_ENUM_WMT_OPID_T;
 

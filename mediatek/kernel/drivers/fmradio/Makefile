@@ -10,17 +10,16 @@ ifeq ($(MTK_FM_SUPPORT), yes)
 $(warning feature_option=$(MTK_FM_CHIP))
 ifeq ($(findstring MT6628_FM,$(MTK_FM_CHIP)),MT6628_FM)
 $(warning MT6628_FM)
-#	FM_CHIP = mt6628
-#	FM_CHIP_PATH = $(FM_CHIP)/pub/$(FM_CHIP)
+	FM_CHIP := mt6628
+	FM_CHIP_PATH := $(FM_CHIP)/pub/$(FM_CHIP)
 	ccflags-y += -I$(src)/inc \
-				-I$(src)/mt6628/inc \
+				-I$(src)/$(FM_CHIP)/inc \
 					-I$(src)/../combo/common/include \
 					-I$(src)/../combo/common/linux/include \
-					-I$(src)/cust/mt6628 \
-				-I$(src)/private/inc
+				-I$(src)/../common_detect
 
 obj-$(CONFIG_MTK_FM) += mtk_fm_drv.o
-	mtk_fm_drv-objs	+= core/fm_module.o \
+	mt6628-objs	:= core/fm_module.o \
 				core/fm_main.o \
 				core/fm_config.o \
 				core/fm_rds_parser.o \
@@ -28,10 +27,11 @@ obj-$(CONFIG_MTK_FM) += mtk_fm_drv.o
 				core/fm_utils.o \
 				core/fm_link.o \
 					core/fm_eint.o  \
-					mt6628/pub/mt6628_fm_lib.o \
-					mt6628/pub/mt6628_fm_rds.o \
-					mt6628/pub/mt6628_fm_cmd.o \
-					mt6628/pub/mt6628_fm_config.o
+				$(FM_CHIP_PATH)_fm_lib.o \
+				$(FM_CHIP_PATH)_fm_rds.o \
+				$(FM_CHIP_PATH)_fm_cmd.o \
+				$(FM_CHIP_PATH)_fm_config.o
+	mtk_fm_drv-objs += $(mt6628-objs)
 $(warning $(mtk_fm_drv-objs))
 	#obj-$(CONFIG_MTK_FM) += private/
 endif
@@ -41,17 +41,16 @@ endif
 
 ifeq ($(findstring MT6620_FM,$(MTK_FM_CHIP)),MT6620_FM)
 $(warning MT6620_FM)
-#	FM_CHIP = mt6620
-#	FM_CHIP_PATH = $(FM_CHIP)/pub/$(FM_CHIP)
+	FM_CHIP := mt6620
+	FM_CHIP_PATH := $(FM_CHIP)/pub/$(FM_CHIP)
 	ccflags-y += -I$(src)/inc \
-					-I$(src)/mt6620/inc \
+					-I$(src)/$(FM_CHIP)/inc \
 					-I$(src)/../combo/common/include \
 					-I$(src)/../combo/common/linux/include \
-					-I$(src)/cust/mt6620 \
-					-I$(src)/private/inc
+					-I$(src)/../common_detect
 
 	obj-$(CONFIG_MTK_FM) += mtk_fm_drv.o
-	mtk_fm_drv-objs	+= core/fm_module.o \
+	mt6620-objs	:= core/fm_module.o \
 					core/fm_main.o \
 					core/fm_config.o \
 					core/fm_rds_parser.o \
@@ -59,10 +58,11 @@ $(warning MT6620_FM)
 					core/fm_utils.o \
 					core/fm_link.o \
 					core/fm_eint.o \
-					mt6620/pub/mt6620_fm_lib.o \
-					mt6620/pub/mt6620_fm_rds.o \
-					mt6620/pub/mt6620_fm_cmd.o \
-					mt6620/pub/mt6620_fm_config.o
+					$(FM_CHIP_PATH)_fm_lib.o \
+					$(FM_CHIP_PATH)_fm_rds.o \
+					$(FM_CHIP_PATH)_fm_cmd.o \
+					$(FM_CHIP_PATH)_fm_config.o
+	mtk_fm_drv-objs += $(mt6620-objs)
 $(warning $(mtk_fm_drv-objs))
 	#obj-$(CONFIG_MTK_FM) += private/
 endif
@@ -71,8 +71,8 @@ endif
 
 # MT6626 FM driver 
 ifeq ($(MTK_FM_CHIP), mt6626)
-FM_CHIP = mt6626
-FM_CHIP_PATH = $(FM_CHIP)/pub/$(FM_CHIP)
+FM_CHIP := mt6626
+FM_CHIP_PATH := $(FM_CHIP)/pub/$(FM_CHIP)
 ccflags-y := -I$(src)/inc \
 				-I$(src)/$(FM_CHIP)/inc \
 				-I$(src)/cust/$(FM_CHIP) \

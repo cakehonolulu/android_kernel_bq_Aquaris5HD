@@ -42,6 +42,7 @@
 #include "wmt_plat_stub.h"
 #include "wmt_exp.h"
 #include <mach/mtk_wcn_cmb_stub.h>
+#include "wmt_lib.h"
 
 /*******************************************************************************
 *                              C O N S T A N T S

@@ -23,6 +23,7 @@
 #include <linux/kernel.h>
 #include <asm/uaccess.h>
 #include <linux/slab.h>
+#include <mach/mtk_wcn_cmb_stub.h>
 
 #include "fm_main.h"
 #include "fm_config.h"
@@ -55,11 +56,6 @@ static struct fm_lock *fm_rtc_mutex;//protect FM GPS RTC drift info
 
 static struct fm_timer *fm_timer_sys;
 
-static struct fm_i2s_info fm_i2s_inf = {
-    .status = 0,    //i2s off
-    .mode = 0,      //slave mode
-    .rate = 48000,  //48000 sample rate
-};
 
 static fm_bool scan_stop_flag = fm_false;
 static struct fm_gps_rtc_info gps_rtc_info;
@@ -70,8 +66,10 @@ static fm_s32 fm_cur_freq_set(fm_u16 new_freq);
 static enum fm_op_state fm_op_state_get(struct fm *fmp);
 static enum fm_op_state fm_op_state_set(struct fm *fmp, enum fm_op_state sta);
 static void fm_timer_func(unsigned long data);
+#ifdef MT6620_FM    
 static void fmtx_timer_func(unsigned long data);
 
+#endif
 static void fm_enable_rds_BlerCheck(struct fm *fm);
 static void fm_disable_rds_BlerCheck(void);
 static void fm_rds_reset_work_func(unsigned long data);
@@ -200,9 +198,7 @@ fm_s32 fm_wholechip_rst_cb(fm_s32 sta)
 fm_s32 fm_open(struct fm *fmp)
 {
     fm_s32 ret = 0;
-#if (defined(MT6620_FM)||defined(MT6628_FM))
     fm_s32 chipid;
-#endif
     FMR_ASSERT(fmp);
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
 
@@ -212,7 +208,6 @@ fm_s32 fm_open(struct fm *fmp)
 
     if ((fmp->ref > 0) && (fmp->chipon == fm_false)) 
 	{
-#if (defined(MT6620_FM)||defined(MT6628_FM))
 		chipid = mtk_wcn_wmt_chipid_query();
 		WCN_DBG(FM_NTC | MAIN, "wmt chip id=0x%x\n",chipid);
 		if(chipid == 0x6628)//get WCN chip ID
@@ -231,7 +226,7 @@ fm_s32 fm_open(struct fm *fmp)
 			WCN_DBG(FM_NTC | MAIN, "get 6620 low ops\n");
 #endif
 		}
-#endif
+
 		if(fm_low_ops.bi.pwron == NULL)
 		{
 			WCN_DBG(FM_NTC | MAIN, "get fm_low_ops fail\n");
@@ -311,7 +306,6 @@ fm_s32 fm_rds_read(struct fm *fmp, fm_s8 *dst, fm_s32 len)
     fm_s32 copy_len = 0, left = 0;
     copy_len = sizeof(rds_t);
 
-RESTART:
 
     if (FM_EVENT_GET(fmp->rds_event) == FM_RDS_DATA_READY) {
         if (FM_LOCK(fm_read_lock)) return (-FM_ELOCK);
@@ -327,13 +321,16 @@ RESTART:
         FM_EVENT_RESET(fmp->rds_event);
         FM_UNLOCK(fm_read_lock);
     } else {
-        if (FM_EVENT_WAIT(fmp->rds_event, FM_RDS_DATA_READY) == 0) {
+        /*if (FM_EVENT_WAIT(fmp->rds_event, FM_RDS_DATA_READY) == 0) {
             WCN_DBG(FM_DBG | MAIN, "fm_read wait ok\n");
             goto RESTART;
         } else {
             WCN_DBG(FM_ALT | MAIN, "fm_read wait err\n");
             return 0;
-        }
+        }*/ /*event wait caused AP stop RDS thread and re-read RDS, which caused issue ALPS00595367 */
+
+		WCN_DBG(FM_DBG | MAIN, "fm_read no event now\n");
+		return 0;
     }
 
     return (copy_len - left);
@@ -342,10 +339,10 @@ RESTART:
 fm_s32 fm_powerup(struct fm *fm, struct fm_tune_parm *parm)
 {
     fm_s32 ret = 0;
+    fm_u8 tmp_vol;
 
     FMR_ASSERT(fm_low_ops.bi.pwron);
     FMR_ASSERT(fm_low_ops.bi.pwrupseq);
-    FMR_ASSERT(fm_low_ops.bi.low_pwr_wa);
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
 
     //for normal case
@@ -384,8 +381,15 @@ fm_s32 fm_powerup(struct fm *fm, struct fm_tune_parm *parm)
     fm_cur_freq_set(parm->freq);
 
     parm->err = FM_SUCCESS;
+    if(fm_low_ops.bi.low_pwr_wa)
+    {
     fm_low_ops.bi.low_pwr_wa(1);
+    }
 
+    fm_low_ops.bi.volget(&tmp_vol);
+	WCN_DBG(FM_NTC | MAIN, "vol=%d!!!\n",tmp_vol);
+    
+    //fm_low_ops.bi.volset(0);
     fm->vol = 15;
 	if(fm_low_ops.ri.rds_bci_get)
 	{
@@ -449,6 +453,7 @@ fm_s32 fm_powerup_tx(struct fm *fm, struct fm_tune_parm *parm)
 		parm->err = FM_SUCCESS; 
 	}
     fm_cur_freq_set(parm->freq);
+#ifdef MT6620_FM    
 	//if(fm_low_ops.ri.rds_bci_get)
 	{
 		fm_timer_sys->count = 0;
@@ -461,6 +466,7 @@ fm_s32 fm_powerup_tx(struct fm *fm, struct fm_tune_parm *parm)
 		WCN_DBG(FM_NTC | MAIN, "start timer ok\n");
 	}
 
+#endif
 out:
     FM_UNLOCK(fm_ops_lock);
     return ret;
@@ -471,20 +477,10 @@ static fm_s32 pwrdown_flow(struct fm *fm)
     fm_s32 ret = 0;
     FMR_ASSERT(fm_low_ops.ri.rds_onoff);
     FMR_ASSERT(fm_low_ops.bi.pwrdownseq);
-    FMR_ASSERT(fm_low_ops.bi.low_pwr_wa);
     if (FM_PWR_OFF == fm_pwr_state_get(fm)) {
-        WCN_DBG(FM_NTC | MAIN, "already pwroff!\n");
+        WCN_DBG(FM_NTC | MAIN, "FMSYS already pwroff!\n");
         goto out;
     }
-	/*if(fm_low_ops.ri.rds_bci_get)
-	{
-		fm_timer_sys->stop(fm_timer_sys);
-		WCN_DBG(FM_NTC | MAIN, "stop timer ok\n");
-	}
-	else
-	{
-		WCN_DBG(FM_NTC | MAIN, "stop timer fail!!!\n");
-	}*/
     
     //Disable all interrupt
     fm_disable_rds_BlerCheck();
@@ -496,7 +492,10 @@ static fm_s32 pwrdown_flow(struct fm *fm)
     //execute power down sequence
     ret = fm_low_ops.bi.pwrdownseq();
 
+    if(fm_low_ops.bi.low_pwr_wa)
+    {
     fm_low_ops.bi.low_pwr_wa(0);
+    }
     WCN_DBG(FM_ALT | MAIN, "pwrdown_flow exit\n");
 
 out:
@@ -533,6 +532,7 @@ fm_s32 fm_powerdowntx(struct fm *fm)
 
     if (FM_PWR_TX_ON == fm_pwr_state_get(fm)) 
     {
+#ifdef MT6620_FM    
 		if (FM_LOCK(fm_timer_lock)) return (-FM_ELOCK);
 		fm_timer_sys->stop(fm_timer_sys);
 		FM_UNLOCK(fm_timer_lock);
@@ -541,21 +541,14 @@ fm_s32 fm_powerdowntx(struct fm *fm)
 		fm_timer_sys->tx_rtc_ctrl_en = FM_TX_RTC_CTRL_DISABLE;
 		fm_timer_sys->tx_desense_en = FM_TX_DESENSE_DISABLE;
 		
-		fm_low_ops.ri.rds_onoff(fm->pstRDSData, fm_false);
+#endif		
+		//fm_low_ops.ri.rds_onoff(fm->pstRDSData, fm_false);
 		//execute power down sequence
-		ret = fm_low_ops.bi.pwrdownseq();
-		if(ret)
-		{
-			WCN_DBG(FM_ERR | MAIN, "pwrdown tx 1 fail\n");
-		}
-		else
-		{
 			ret = fm_low_ops.bi.pwrdownseq_tx();
 			if(ret)
 			{
-				WCN_DBG(FM_ERR | MAIN, "pwrdown tx 2 fail\n");
+			WCN_DBG(FM_ERR | MAIN, "pwrdown tx fail\n");
 			}
-		}
 		fm_pwr_state_set(fm, FM_PWR_OFF);
 		WCN_DBG(FM_NTC | MAIN, "pwrdown tx ok\n");
     }
@@ -699,7 +692,8 @@ fm_s32 fm_tx_scan(struct fm *fm, struct fm_tx_scan_parm *parm)
     } else if (parm->band == FM_BAND_SPECIAL) {
         fm->min_freq = FM_FREQ_MIN;
         fm->max_freq = FM_FREQ_MAX;
-    } else 
+    } 
+    else 
     {
         WCN_DBG(FM_ERR| MAIN,"band:%d out of range\n", parm->band);
 		parm->err = FM_EPARM;
@@ -940,6 +934,7 @@ fm_s32 fm_seek_new(struct fm *fm, struct fm_seek_t *parm)
     FMR_ASSERT(fm_low_ops.bi.setfreq);
     FMR_ASSERT(fm_low_ops.bi.rssiget);
     FMR_ASSERT(fm_low_ops.bi.rampdown);
+    FMR_ASSERT(fm_low_ops.bi.seek);
 
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
      
@@ -1188,24 +1183,32 @@ fm_s32 fm_get_hw_info(struct fm *pfm, struct fm_hw_info *req)
 }
 
 
+fm_s32 fm_get_aud_info(fm_audio_info_t *data)
+{
+    //FMR_ASSERT(fm_low_ops.bi.get_aud_info);
+    if(fm_low_ops.bi.get_aud_info)
+    {
+        return fm_low_ops.bi.get_aud_info(data);
+    }
+    else
+    {
+        data->aud_path = FM_AUD_ERR;
+        data->i2s_info.mode = FM_I2S_MODE_ERR;
+        data->i2s_info.status = FM_I2S_STATE_ERR;
+        data->i2s_info.rate = FM_I2S_SR_ERR;
+        return 0;
+    }
+}
 /*  fm_get_i2s_info -- i2s info: on/off, master/slave, sample rate
   *  @pfm - fm driver global DS
-  *  @freq - target buffer
+  *  @req - target buffer
   *  return value: 0, success; else error NO.
   */
 fm_s32 fm_get_i2s_info(struct fm *pfm, struct fm_i2s_info *req)
 {
-    FMR_ASSERT(req);
+    FMR_ASSERT(fm_low_ops.bi.i2s_get);
 
-    if (fm_low_ops.bi.i2s_get) {
         return fm_low_ops.bi.i2s_get(&req->status, &req->mode, &req->rate);
-    } else {
-        req->status = fm_i2s_inf.status;
-        req->mode = fm_i2s_inf.mode;
-        req->rate = fm_i2s_inf.rate;
-
-        return 0;
-    }
 }
 
 
@@ -1359,6 +1362,56 @@ fm_s32 fm_reg_write(struct fm *fm, fm_u8 addr, fm_u16 val)
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
 
     ret = fm_low_ops.bi.write(addr, val);
+    FM_UNLOCK(fm_ops_lock);
+    return ret;
+}
+fm_s32 fm_top_read(struct fm *fm, fm_u16 addr, fm_u32 *val)
+{
+    fm_s32 ret = 0;
+
+    FMR_ASSERT(fm_low_ops.bi.top_read);
+    if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
+
+    ret = fm_low_ops.bi.top_read(addr, val);
+
+    FM_UNLOCK(fm_ops_lock);
+    return ret;
+}
+
+fm_s32 fm_top_write(struct fm *fm, fm_u16 addr, fm_u32 val)
+{
+    fm_s32 ret = 0;
+
+    FMR_ASSERT(fm_low_ops.bi.top_write);
+    if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
+
+    ret = fm_low_ops.bi.top_write(addr, val);
+
+    FM_UNLOCK(fm_ops_lock);
+    return ret;
+}
+
+fm_s32 fm_host_read(struct fm *fm, fm_u32 addr, fm_u32 *val)
+{
+    fm_s32 ret = 0;
+
+    FMR_ASSERT(fm_low_ops.bi.host_read);
+    if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
+
+    ret = fm_low_ops.bi.host_read(addr, val);
+
+    FM_UNLOCK(fm_ops_lock);
+    return ret;
+}
+
+fm_s32 fm_host_write(struct fm *fm, fm_u32 addr, fm_u32 val)
+{
+    fm_s32 ret = 0;
+
+    FMR_ASSERT(fm_low_ops.bi.host_write);
+    if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
+
+    ret = fm_low_ops.bi.host_write(addr, val);
 
     FM_UNLOCK(fm_ops_lock);
     return ret;
@@ -1453,13 +1506,22 @@ fm_s32 fm_em_test(struct fm *fm, fm_u16 group, fm_u16 item, fm_u32 val)
     FM_UNLOCK(fm_ops_lock);
     return ret;
 }
+fm_s32 fm_set_search_th(struct fm *fm, struct fm_search_threshold_t parm)
+{
+    fm_s32 ret = 0;
 
+    FMR_ASSERT(fm_low_ops.bi.set_search_th);
+    if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
+    ret = fm_low_ops.bi.set_search_th(parm.th_type,parm.th_val,parm.reserve);
+    
+    FM_UNLOCK(fm_ops_lock);
+    return ret;
+}
 fm_s32 fm_rds_tx(struct fm *fm, struct fm_rds_tx_parm *parm)
 {
     fm_s32 ret = 0;
 
     FMR_ASSERT(fm_low_ops.ri.rds_tx);
-    FMR_ASSERT(fm_low_ops.ri.rds_tx_enable);
 
     if (fm_pwr_state_get(fm) != FM_PWR_TX_ON) {
         parm->err = FM_BADSTATUS;
@@ -1474,12 +1536,6 @@ fm_s32 fm_rds_tx(struct fm *fm, struct fm_rds_tx_parm *parm)
         goto out;
     }
     
-    ret = fm_low_ops.ri.rds_tx_enable();
-    if(ret){
-        WCN_DBG(FM_ERR | MAIN,"Rds_Tx_Enable failed!\n");
-        goto out;
-    }   
-    fm->rdstx_on = fm_true;
     ret = fm_low_ops.ri.rds_tx(parm->pi, parm->ps, parm->other_rds, parm->other_rds_cnt);
     if(ret){
         WCN_DBG(FM_ERR | MAIN,"Rds_Tx failed!\n");
@@ -1498,6 +1554,11 @@ fm_s32 fm_rds_onoff(struct fm *fm, fm_u16 rdson_off)
 {
     fm_s32 ret = 0;
 
+    if (fm_pwr_state_get(fm) != FM_PWR_RX_ON) 
+    {
+        ret = -EPERM;
+        goto out;
+    }
     FMR_ASSERT(fm_low_ops.ri.rds_onoff);
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
 
@@ -1623,6 +1684,10 @@ fm_s32 fm_i2s_set(struct fm *fm, fm_s32 onoff, fm_s32 mode, fm_s32 sample)
     fm_s32 ret = 0;
 
     FMR_ASSERT(fm_low_ops.bi.i2s_set);
+    if ((onoff != 0)||(onoff != 1))
+    {
+        onoff = 0;//default on.
+    }
     if (FM_LOCK(fm_ops_lock)) return (-FM_ELOCK);
 
     ret = fm_low_ops.bi.i2s_set(onoff, mode, sample);
@@ -1650,12 +1715,6 @@ fm_s32 fm_tune_tx(struct fm *fm, struct fm_tune_parm *parm)
 
 	fm_op_state_set(fm, FM_STA_TUNE);
 	WCN_DBG(FM_NTC | MAIN, "Tx tune to %d\n", parm->freq);
-#if 0//ramp down tx will do in tx tune  flow
-    while(0){
-        if((ret = MT6620_RampDown_Tx()))
-            return ret;
-    }
-#endif
     //tune to desired channel
     if (fm_true != fm_low_ops.bi.tune_tx(parm->freq)) 
     {
@@ -1743,7 +1802,7 @@ fm_s32 fm_tune(struct fm *fm, struct fm_tune_parm *parm)
         ret = -EPERM;
     }
 
-//    fm_low_ops.bi.mute(fm_false);
+	//fm_low_ops.bi.mute(fm_false);//open for dbg
     fm_op_state_set(fm, FM_STA_PLAY);
 out:
     FM_UNLOCK(fm_ops_lock);
@@ -1767,6 +1826,38 @@ fm_s32 fm_cqi_log(void)
 		return (-FM_ELOCK);
 	ret = fm_low_ops.bi.cqi_log(8750,10800,2,5);
     FM_UNLOCK(fm_ops_lock);
+	return ret;
+}
+fm_s32 fm_pre_search(struct fm *fm)
+{
+    fm_s32 ret = 0;
+	FMR_ASSERT(fm_low_ops.bi.pre_search);
+	if (fm_pwr_state_get(fm) != FM_PWR_RX_ON) 
+	{
+	    return -FM_EPARA;
+	}
+	if (FM_LOCK(fm_ops_lock)) 
+	{
+		return (-FM_ELOCK);
+	}
+	ret = fm_low_ops.bi.pre_search();	
+	FM_UNLOCK(fm_ops_lock);
+	return ret;
+}
+fm_s32 fm_restore_search(struct fm *fm)
+{
+    fm_s32 ret = 0;
+	FMR_ASSERT(fm_low_ops.bi.restore_search);
+	if (fm_pwr_state_get(fm) != FM_PWR_RX_ON) 
+	{
+	    return -FM_EPARA;
+	}
+	if (FM_LOCK(fm_ops_lock)) 
+	{
+		return (-FM_ELOCK);
+	}
+	ret = fm_low_ops.bi.restore_search();	
+	FM_UNLOCK(fm_ops_lock);
 	return ret;
 }
 /*fm soft mute tune function*/
@@ -1862,19 +1953,37 @@ fm_s32 fm_rdstx_support(struct fm *fm, fm_s32 *support)
 	FM_UNLOCK(fm_ops_lock);
 	return 0;
 }
-fm_s32 fm_rdstx_enable(struct fm *fm, fm_s32 *support)
+/*1:on,0:off*/
+fm_s32 fm_rdstx_enable(struct fm *fm, fm_s32 enable)
 {
+    fm_s32 ret =-1;
+    FMR_ASSERT(fm_low_ops.ri.rds_tx_enable);
+    FMR_ASSERT(fm_low_ops.ri.rds_tx_disable);
+    if (fm_pwr_state_get(fm) != FM_PWR_TX_ON)
+    {
+        return -FM_EPARA;
+    }
 	if (FM_LOCK(fm_ops_lock)) 
 		return (-FM_ELOCK);
-	if(fm->rdstx_on)
+    if(enable == 1)
 	{
-		*support=1;
+        ret = fm_low_ops.ri.rds_tx_enable();
+        if (ret)
+        {
+            FM_LOG_ERR(MAIN,"rds_tx_enable fail=[%d]!\n", ret);
+        }
+        fm->rdstx_on = fm_true;
 	}
 	else
 	{
-		*support=0;
+        ret = fm_low_ops.ri.rds_tx_disable();
+        if (ret)
+        {
+            FM_LOG_ERR(MAIN,"rds_tx_disable fail=[%d]!\n", ret);
 	}
-    WCN_DBG(FM_NTC | MAIN,"rds tx enable=[%d]!\n", *support);
+        fm->rdstx_on = fm_false;
+    }
+    FM_LOG_NTC(MAIN,"rds tx enable=[%d]!\n", enable);
 	FM_UNLOCK(fm_ops_lock);
 	return 0;
 }
@@ -1900,6 +2009,7 @@ out:
 }
 
 
+#ifdef MT6620_FM    
 static void fmtx_timer_func(unsigned long data)
 {
     struct fm *fm = g_fm_struct;
@@ -1949,6 +2059,7 @@ out:
     FM_UNLOCK(fm_timer_lock);
 }
 
+#endif
 static void fm_tx_power_ctrl_worker_func(unsigned long data)
 {
     fm_s32 ctrl = 0,ret=0;
@@ -2141,6 +2252,7 @@ static void fm_enable_rds_BlerCheck(struct fm *fm)
     if (FM_LOCK(fm_timer_lock)) return;
     fm_timer_sys->start(fm_timer_sys);
     FM_UNLOCK(fm_timer_lock);
+    FM_LOG_NTC(MAIN, "enable rds timer ok\n");
 }
 
 static void fm_disable_rds_BlerCheck(void)
@@ -2148,6 +2260,7 @@ static void fm_disable_rds_BlerCheck(void)
     if (FM_LOCK(fm_timer_lock)) return;
     fm_timer_sys->stop(fm_timer_sys);
     FM_UNLOCK(fm_timer_lock);
+    FM_LOG_NTC(MAIN, "stop rds timer ok\n");
 }
 
 void fm_rds_reset_work_func(unsigned long data)
@@ -2186,30 +2299,43 @@ void fm_subsys_reset_work_func(unsigned long data)
     
     if (g_fm_struct->chipon == fm_false)
 	{
-        WCN_DBG(FM_ALT | MAIN, "no need do recover\n");
+        WCN_DBG(FM_ALT | MAIN, "chip off no need do recover\n");
         goto out;
     }
+    fm_low_ops.bi.pwrdownseq();
     // subsystem power off
-    fm_low_ops.bi.pwroff(0);
+    if (fm_low_ops.bi.pwroff(0))
+    {
+        WCN_DBG(FM_ALT | MAIN, "chip off fail\n");
+        goto out;
+    }
     
     // prepare to reset
     
     // wait 3s
-    fm_low_ops.bi.msdelay(2000);
+    //fm_low_ops.bi.msdelay(2000);
     
     // subsystem power on
-    fm_low_ops.bi.pwron(0);
+    if (fm_low_ops.bi.pwron(0))
+    {
+        WCN_DBG(FM_ALT | MAIN, "chip on fail\n");
+        goto out;
+    }
     
     // recover context
-    if (g_fm_struct->chipon == fm_false) {
+    if (g_fm_struct->chipon == fm_false) 
+    {
         fm_low_ops.bi.pwroff(0);
         WCN_DBG(FM_ALT | MAIN, "no need do recover\n");
         goto out;
     }
 
-    if (FM_PWR_RX_ON == fm_pwr_state_get(g_fm_struct)) {
+    if (FM_PWR_RX_ON == fm_pwr_state_get(g_fm_struct)) 
+    {
         fm_low_ops.bi.pwrupseq(&g_fm_struct->chip_id, &g_fm_struct->device_id);
-    } else {
+    } 
+    else 
+    {
         WCN_DBG(FM_ALT | MAIN, "no need do re-powerup\n");
         goto out;
     }
@@ -2220,8 +2346,10 @@ void fm_subsys_reset_work_func(unsigned long data)
 
     fm_low_ops.bi.volset((fm_u8)g_fm_struct->vol);
 
+    g_fm_struct->mute=0;
     fm_low_ops.bi.mute(g_fm_struct->mute);
 
+    g_fm_struct->rds_on=1;
     fm_low_ops.ri.rds_onoff(g_fm_struct->pstRDSData, g_fm_struct->rds_on);
 
     WCN_DBG(FM_ALT | MAIN, "recover done\n");
@@ -2819,57 +2947,6 @@ fm_s32 fm_env_destroy(void)
     return ret;
 }
 
-#if 0//(!defined(MT6620_FM)&&!defined(MT6628_FM))
-fm_s32 fm_priv_register(struct fm_priv *pri, struct fm_pub *pub)
-{
-    fm_s32 ret = 0;
-    //Basic functions.
-
-    WCN_DBG(FM_NTC | MAIN, "%s\n", __func__);
-    FMR_ASSERT(pri);
-    FMR_ASSERT(pub);
-
-    // functions provided by private module
-    priv_adv.priv_tbl.hl_dese = pri->priv_tbl.hl_dese;
-    priv_adv.priv_tbl.fa_dese = pri->priv_tbl.fa_dese;
-    priv_adv.priv_tbl.mcu_dese = pri->priv_tbl.mcu_dese;
-    priv_adv.priv_tbl.gps_dese = pri->priv_tbl.gps_dese;
-    priv_adv.priv_tbl.chan_para_get = pri->priv_tbl.chan_para_get;
-    priv_adv.priv_tbl.is_dese_chan = pri->priv_tbl.is_dese_chan;
-    priv_adv.state = INITED;
-    priv_adv.data = NULL;
-
-    // for special chip(chip with DSP) use
-    fm_low_ops.cb.chan_para_get = priv_adv.priv_tbl.chan_para_get;
-
-    // private module will use these functions
-    pub->pub_tbl.read = fm_low_ops.bi.read;
-    pub->pub_tbl.write = fm_low_ops.bi.write;
-    pub->pub_tbl.setbits = fm_low_ops.bi.setbits;
-    pub->pub_tbl.rampdown = fm_low_ops.bi.rampdown;
-    pub->pub_tbl.msdelay = fm_low_ops.bi.msdelay;
-    pub->pub_tbl.usdelay = fm_low_ops.bi.usdelay;
-    pub->pub_tbl.log = (fm_s32 (*)(const fm_s8 *arg1, ...))printk;
-    pub->state = INITED;
-    pub->data = NULL;
-
-    return ret;
-}
-
-fm_s32 fm_priv_unregister(struct fm_priv *pri, struct fm_pub *pub)
-{
-    WCN_DBG(FM_NTC | MAIN, "%s\n", __func__);
-
-    //FMR_ASSERT(pri);
-    FMR_ASSERT(pub);
-
-    fm_memset(&priv_adv, 0, sizeof(struct fm_priv));
-    fm_low_ops.cb.chan_para_get = NULL;
-    fm_memset(pub, 0, sizeof(struct fm_pub));
-
-    return 0;
-}
-#endif
 
 /*
  * GetChannelSpace - get the spcace of gived channel
@@ -2879,9 +2956,9 @@ fm_s32 fm_priv_unregister(struct fm_priv *pri, struct fm_pub *pub)
  */
 fm_s32 fm_get_channel_space(fm_s32 freq)
 {
-    if ((freq >= 760) && (freq <= 1080)) {
+    if ((freq >= 640) && (freq <= 1080)) {
         return 0;
-    } else if ((freq >= 7600) && (freq <= 10800)) {
+    } else if ((freq >= 6400) && (freq <= 10800)) {
         return 1;
     } else {
         return -1;
