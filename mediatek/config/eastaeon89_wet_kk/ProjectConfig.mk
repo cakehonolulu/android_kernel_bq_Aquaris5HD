@@ -52,10 +52,10 @@ CUSTOM_HAL_EEPROM=dummy_eeprom
 CUSTOM_HAL_FLASHLIGHT=constant_flashlight
 
 # User space image sensor driver. Define  project used all image sensors. The value is combination of CUSTOM_HAL_MAIN_IMGSENSOR, CUSTOM_HAL_MAIN_BACKUP_IMGSENSOR, CUSTOM_HAL_SUB_IMGSENSOR, and CUSTOM_HAL_SUB_BACKUP_IMGSENSOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CUSTOM_HAL_IMGSENSOR=ov8825_mipi_raw s5k8aayx_mipi_yuv
+CUSTOM_HAL_IMGSENSOR=s5k3h2yx_mipi_raw s5k8aayx_mipi_yuv
 
 # = CUSTOM_HAL_MAIN_LENS +CUSTOM_HAL_MAIN_BACKUP_LENS + CUSTOM_HAL_SUB_LENS + CUSTOM_HAL_SUB_BACKUP_LENS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CUSTOM_HAL_LENS=ov8825af dummy_lens
+CUSTOM_HAL_LENS=s5k3h2yxaf dummy_lens
 CUSTOM_HAL_MAIN2_IMGSENSOR=
 CUSTOM_HAL_MAIN_BACKUP_IMGSENSOR=
 
@@ -116,7 +116,7 @@ CUSTOM_KERNEL_FLASHLIGHT=constant_flashlight
 CUSTOM_KERNEL_HEADSET=accdet
 
 # Kernel space image sensor driver. Define  project used all image sensors .The value is combination of CUSTOM_KERNEL_MAIN_IMGSENSOR, CUSTOM_KERNEL_MAIN_BACKUP_IMGSENSOR, CUSTOM_KERNEL_SUB_IMGSENSOR, and CUSTOM_KERNEL_SUB_BACKUP_IMGSENSOR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CUSTOM_KERNEL_IMGSENSOR=ov8825_mipi_raw s5k8aayx_mipi_yuv
+CUSTOM_KERNEL_IMGSENSOR=s5k3h2yx_mipi_raw s5k8aayx_mipi_yuv
 
 # key pad driver to report key event
 CUSTOM_KERNEL_KPD=kpd
@@ -125,7 +125,7 @@ CUSTOM_KERNEL_KPD=kpd
 CUSTOM_KERNEL_LEDS=mt65xx
 
 # same as CUSTOM_HAL_LENS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CUSTOM_KERNEL_LENS=ov8825af dummy_lens
+CUSTOM_KERNEL_LENS=s5k3h2yxaf dummy_lens
 
 # compass driver to detect compass raw data and report orientatino data
 CUSTOM_KERNEL_MAGNETOMETER=
