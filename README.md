@@ -9,7 +9,7 @@ This repo contains all the required things to compile the Linux Kernel source co
 In order to compile the source code right, we need the arm-eabi toolchain downloaded in our Hard drive (arm-eabi-4.7 preferred) and declare it as a environment variable:
 
 ```
-export CROSS_COMPILE=/path/to/arm-eabi-4.6/bin/arm-eabi-
+export PATH=pathToDir/arm-eabi-4.7/bin:$PATH
 ```
 
 ## Compiling
@@ -17,6 +17,11 @@ export CROSS_COMPILE=/path/to/arm-eabi-4.6/bin/arm-eabi-
 To compile the source code, all we need is run the building command in our kernel's root folder:
 
 ```
+export CROSS_COMPILE=arm-eabi-
+export TARGET_KERNEL_VERSION=eastaeon89_wet_kk
+export MTK_ROOT_CUSTOM=mediatek/custom/
+export TARGET_PRODUCT=eastaeon89_wet_kk
+export TARGET_BUILD_VARIANT=user
 export ARCH=arm
 ./makeMtk -t -o=TARGET_BUILD_VARIANT=user eastaeon89_wet_kk n k
 ```
