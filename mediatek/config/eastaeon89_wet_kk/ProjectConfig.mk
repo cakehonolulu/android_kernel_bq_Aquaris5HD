@@ -650,6 +650,8 @@ MTK_DX_HDCP_SUPPORT=no
 # if this feature option is enabled, then Android OS support eap-sim and eap-aka authentication when using Wi-Fi.
 MTK_EAP_SIM_AKA=yes
 
+CONFIG_ANDROID_LOGGER=y
+
 # yes: enable
 # no:  disable
 MTK_EMMC_DISCARD=no
