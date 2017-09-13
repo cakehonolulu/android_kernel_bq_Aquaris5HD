@@ -938,7 +938,7 @@ extern void update_idle_cpu_load(struct rq *this_rq);
 
 extern void init_task_runnable_average(struct task_struct *p);
 #else
-extern void update_cpu_load(struct rq *this_rq);
+extern void update_idle_cpu_load(struct rq *this_rq);
 #endif
 
 #ifdef CONFIG_CGROUP_CPUACCT
