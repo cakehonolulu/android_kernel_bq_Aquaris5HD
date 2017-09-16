@@ -30,7 +30,9 @@ static unsigned int _cl_cam = 0;
 static ssize_t _cl_cam_write( struct file *filp, const char __user *buf, size_t len, loff_t *data)
 {
 	int ret = 0;
-	char tmp[MAX_LEN] = {0};
+	char tmp[MAX_LEN] = { 0 };
+
+    len = min(len,MAX_LEN-1);
 
 	/* write data to the buffer */
 	if ( copy_from_user(tmp, buf, len) ) {
