@@ -1276,11 +1276,13 @@ priv_set_ints (
     IN char *pcExtra
     )
 {
-    UINT_32                     u4SubCmd, u4BufLen;
+    UINT_32                     u4SubCmd, u4BufLen, u4CmdLen;
     P_GLUE_INFO_T               prGlueInfo;
     int                         status = 0;
     WLAN_STATUS                 rStatus = WLAN_STATUS_SUCCESS;
     P_SET_TXPWR_CTRL_T          prTxpwr;
+    UINT_16                     i = 0;
+    INT_32                      setting[4] = {0};
 
     ASSERT(prNetDev);
     ASSERT(prIwReqInfo);
@@ -1293,19 +1295,16 @@ priv_set_ints (
     prGlueInfo = *((P_GLUE_INFO_T *) netdev_priv(prNetDev));
 
     u4SubCmd = (UINT_32) prIwReqData->data.flags;
+    u4CmdLen = prIwReqData->data.length;
 
     switch (u4SubCmd) {
     case PRIV_CMD_SET_TX_POWER:
         {
-        INT_32 *setting = prIwReqData->data.pointer;
-        UINT_16 i;
+        if (u4CmdLen > 4)
+            return -EINVAL;
+        if (copy_from_user(setting, prIwReqData->data.pointer, u4CmdLen))
+            return -EFAULT;
 
-#if 0
-        printk("Tx power num = %d\n", prIwReqData->data.length);
-
-        printk("Tx power setting = %d %d %d %d\n",
-                            setting[0], setting[1], setting[2], setting[3]);
-#endif
         prTxpwr = &prGlueInfo->rTxPwr;
         if (setting[0] == 0 && prIwReqData->data.length == 4 /* argc num */) {
             /* 0 (All networks), 1 (legacy STA), 2 (Hotspot AP), 3 (P2P), 4 (BT over Wi-Fi) */
