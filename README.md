@@ -1,4 +1,4 @@
-# 3.4.67 Open Source Kernel for bq Aquaris 5 HD
+# 3.4.113 Open Source Kernel for bq Aquaris 5 HD
 
 ## What is this?
 
