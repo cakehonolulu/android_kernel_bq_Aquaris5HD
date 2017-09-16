@@ -1527,10 +1527,8 @@ priv_set_struct (
         break;
 
     case PRIV_CMD_SW_CTRL:
-        pu4IntBuf = (PUINT_32)prIwReqData->data.pointer;
         prNdisReq = (P_NDIS_TRANSPORT_STRUCT) &aucOidBuf[0];
 
-        //kalMemCopy(&prNdisReq->ndisOidContent[0], prIwReqData->data.pointer, 8);
         if (copy_from_user(&prNdisReq->ndisOidContent[0],
                            prIwReqData->data.pointer,
                            prIwReqData->data.length)) {
@@ -1648,7 +1646,6 @@ priv_get_struct (
         break;
 
     case PRIV_CMD_SW_CTRL:
-        pu4IntBuf = (PUINT_32)prIwReqData->data.pointer;
         prNdisReq = (P_NDIS_TRANSPORT_STRUCT) &aucOidBuf[0];
 
         if (copy_from_user(&prNdisReq->ndisOidContent[0],
