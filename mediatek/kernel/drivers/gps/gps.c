@@ -795,6 +795,7 @@ static ssize_t mt3326_gps_write(struct file *file, const char __user *buf, size_
 {    
     struct gps_data *dev = file->private_data;
     ssize_t ret = 0;
+    size_t copy_size = 0;
 
     GPS_TRC();    
     
