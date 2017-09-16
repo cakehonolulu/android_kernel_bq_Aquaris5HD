@@ -13,7 +13,6 @@ obj-$(CONFIG_MTK_FB) += disp_drv_dbi.o              \
 		 mtkfb_vsync.o								\
          debug.o                                    \
          tv_out.o                                   \
-         mtkfb_proc.o                               \
          disp_sync.o
 
 ccflags-y += -I$(MTK_PATH_SOURCE)/drivers/video/        \

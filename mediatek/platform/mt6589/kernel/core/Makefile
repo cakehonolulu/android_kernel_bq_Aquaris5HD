@@ -25,7 +25,6 @@ obj-y += mt_spm.o mt_spm_sleep.o mt_spm_idle.o mt_spm_mtcmos.o
 obj-y += mt_sleep.o
 obj-y += mt_cpufreq.o
 obj-y += mt_gpufreq.o
-obj-y += mt_emifreq.o
 obj-y += mt_cpu_ss.o
 obj-y += mt_dormant.o cpu_dormant.o
 obj-y += mt_dcm.o mt_idle.o
