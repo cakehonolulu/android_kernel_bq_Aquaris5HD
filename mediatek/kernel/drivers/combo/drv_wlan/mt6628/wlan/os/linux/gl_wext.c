@@ -507,7 +507,12 @@ static const struct iw_priv_args rIwPrivTable[] = {
 #if CFG_ENABLE_WIFI_DIRECT
     {PRIV_CMD_P2P_MODE,         IW_PRIV_TYPE_INT | IW_PRIV_SIZE_FIXED | 2, 0,   "set_p2p_mode" },
 #endif
-    {PRIV_CMD_GET_BUILD_DATE_CODE,      0, IW_PRIV_TYPE_CHAR | 16,              "get_date_code" },;
+    {PRIV_CMD_GET_BUILD_DATE_CODE,      0, IW_PRIV_TYPE_CHAR | 16,              "get_date_code" },
+    {PRIV_CMD_GET_DEBUG_CODE,      0, IW_PRIV_TYPE_CHAR | 16,              		"get_dbg_code" },
+	/* handle any command with many input parameters */
+	{PRIV_CMD_OTHER,			IW_PRIV_TYPE_CHAR | 256, 0,   "set_str_cmd"}, /* ++ TDLS */
+};
+
 static const iw_handler rIwPrivHandler[] = {
     [IOCTL_SET_INT - SIOCIWFIRSTPRIV] = priv_set_int,
     [IOCTL_GET_INT - SIOCIWFIRSTPRIV] = priv_get_int,
@@ -522,7 +527,9 @@ static const iw_handler rIwPrivHandler[] = {
     [IOCTL_SET_STRUCT_FOR_EM - SIOCIWFIRSTPRIV] = priv_set_struct,
     [IOCTL_SET_INTS - SIOCIWFIRSTPRIV] = priv_set_ints,
     [IOCTL_GET_INTS - SIOCIWFIRSTPRIV] = priv_get_ints,
+    [IOCTL_SET_STRING - SIOCIWFIRSTPRIV] = priv_set_string, /* ++ TDLS */
 };
+
 const struct iw_handler_def wext_handler_def = {
     .num_standard   = 0,
     .num_private = (__u16)sizeof(rIwPrivHandler)/sizeof(iw_handler),
