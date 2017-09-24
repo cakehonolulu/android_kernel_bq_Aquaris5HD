@@ -7,7 +7,6 @@ MTK_AUTOCONFIG_LIST := $(patsubst $(call relative-path,../../config/common/autoc
 define .mtk.config.delete-rule
 $(1): $(2).delete
 $(2).delete: 
-	@echo "[DELETE] $(2)"
 	@rm -rf $(2)
 endef
 
@@ -15,8 +14,6 @@ endef
 define .mtk.config.generate-rule
 $(1): $(2)
 $(2): $(3)
-	@$(if $(filter 0,$(MAKELEVEL)),,echo "[CONFIG] copy $(3)")
-	@$(if $(filter 0,$(MAKELEVEL)),,echo "           to $(2)")
 	@mkdir -p $(dir $(2))
 	@cp -f $(3) $(2)
 endef
@@ -25,7 +22,6 @@ define .mtk.config.generate-auto-merge-rules
 $(1): $(2)
 $(2): PRIVATE_FILE_LIST := $(3)
 $(2): $(3) $(4)
-	@echo "[CONFIG] generate $(2)"
 	@mkdir -p $(dir $(2))
 	@python $(4) $(3) > $(2)
 endef
@@ -52,11 +48,6 @@ endef
 define mtk.projectconfig.generate-auto-rules
 $(eval \
 $(MTK_ROOT_CONFIG_OUT)/ProjectConfig.mk: $(MTK_PROJECT_CONFIGS)
-ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
-	-@echo [Update] $$@: $$?
-else
-	@echo "[CONFIG] generate $$@"
-endif
 	$$(hide) if [ -e $$@ ]; then chmod u+w $$@; else mkdir -p $$(dir $$@); fi
 	$$(hide) python $$(MTK_ROOT_BUILD)/tools/config/merge-project.py $$(MTK_PROJECT_CONFIGS) > $$@
 )

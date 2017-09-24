@@ -23,7 +23,6 @@ usage() {
 }
 
 make_clean() {
-    echo "**** Cleaning ****"
     nice make ${makeflags} ${makedefs} distclean
 }
 
@@ -71,7 +70,6 @@ done
 if [ "${clean}" == "y" ];   then make_clean; exit 0; fi
 if [ "${rebuild}" == "y" ]; then make_clean; fi
 
-echo "**** Configuring ****"
 # select correct configuration file
 if [ -z ${custcfg} ];       then make mediatek-configs; fi
 if [ ! -z ${custcfg} ];     then cat ${custcfg} > ${curcfg}; fi
@@ -79,7 +77,6 @@ if [ ! -z ${custcfg} ];     then cat ${custcfg} > ${curcfg}; fi
 # update configuration
 nice make ${makeflags} ${makedefs} silentoldconfig
 
-echo "**** Building ****"
 make ${makeflags} ${makejobs} ${makedefs}
 
 if [ $? -ne 0 ]; then exit 1; fi
@@ -90,8 +87,6 @@ mkimg="${MTK_ROOT_BUILD}/tools/mkimage"
 kernel_img="${curdir}/arch/arm/boot/Image"
 kernel_zimg="${curdir}/arch/arm/boot/zImage"
 rootfs_img="${curdir}/trace32/rootfs_`echo ${MTK_PLATFORM} | tr A-Z a-z`.gz"
-
-echo "**** Generate download images ****"
 
 if [ ! -x ${mkimg} ]; then chmod a+x ${mkimg}; fi
 

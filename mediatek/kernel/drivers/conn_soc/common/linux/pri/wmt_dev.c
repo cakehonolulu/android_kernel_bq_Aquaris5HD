@@ -41,9 +41,11 @@
 #include <mach/mtk_wcn_cmb_stub.h>
 #include "wmt_idc.h"
 
-#if CONSYS_WMT_REG_SUSPEND_CB_ENABLE
+#include <linux/suspend.h>
 #include <linux/device.h>
 #include <linux/platform_device.h>
+#ifdef CONFIG_EARLYSUSPEND
+#include <linux/earlysuspend.h>
 #endif
 
 #define MTK_WMT_VERSION  "SOC Consys WMT Driver - v1.0"
@@ -152,6 +154,34 @@ static INT32 wmt_dbg_lte_coex_test(INT32 par1, INT32 par2, INT32 par3);
 *                          F U N C T I O N S
 ********************************************************************************
 */
+
+#if CONSYS_WMT_REG_SUSPEND_CB_ENABLE || defined(CONFIG_EARLYSUSPEND)
+
+static INT32 wmt_pwr_on_handler (struct work_stuct *work)
+{
+        INT32 retryCounter = 1;
+        WMT_INFO_FUNC("wmt_pwr_on_thread start to run\n");
+
+        do {
+                if (MTK_WCN_BOOL_FALSE == mtk_wcn_wmt_func_on(WMTDRV_TYPE_LPBK)) {
+                        WMT_WARN_FUNC("WMT turn on LPBK fail, retrying, retryCounter left:%d!\n", retryCounter);
+                        retryCounter--;
+                        osal_sleep_ms(1000);
+                }
+                else
+                {
+                        WMT_INFO_FUNC("WMT turn on LPBK suceed");
+                        break;
+                }
+        } while (retryCounter > 0);
+
+        WMT_INFO_FUNC("wmt_pwr_on_thread exits\n");
+        return 0;
+}
+
+
+
+#endif
 
 #if CONSYS_WMT_REG_SUSPEND_CB_ENABLE
 static int mtk_wmt_suspend(struct platform_device *pdev, pm_message_t state)
@@ -1841,8 +1871,7 @@ unsigned int WMT_poll(struct file *filp, poll_table *wait)
 }
 
 //INT32 WMT_ioctl(struct inode *inode, struct file *filp, UINT32 cmd, unsigned long arg)
-long
-WMT_unlocked_ioctl (
+long WMT_unlocked_ioctl (
     struct file *filp,
     unsigned int cmd,
     unsigned long arg
@@ -2388,6 +2417,13 @@ static int WMT_init(void)
 	gWmtInitDone = 1;
 	wake_up(&gWmtInitWq);
 
+#ifdef CONFIG_EARLYSUSPEND
+    osal_sleepable_lock_init(&g_es_lr_lock);
+        INIT_WORK(&gPwrOnWork, wmt_pwr_on_handler);
+    register_early_suspend(&wmt_early_suspend_handler);
+    WMT_INFO_FUNC("register_early_suspend finished\n");
+#endif
+
 	WMT_INFO_FUNC("success \n");
     return 0;
 
@@ -2413,7 +2449,13 @@ error:
 static void WMT_exit (void)
 {
     dev_t dev = MKDEV(gWmtMajor, 0);
-	
+
+#ifdef CONFIG_EARLYSUSPEND
+    unregister_early_suspend(&wmt_early_suspend_handler);
+        osal_sleepable_lock_deinit(&g_es_lr_lock);
+    WMT_INFO_FUNC("unregister_early_suspend finished\n");
+#endif
+    
 #if CONSYS_WMT_REG_SUSPEND_CB_ENABLE
 	platform_driver_unregister(&mtk_wmt_dev_drv);
 #endif

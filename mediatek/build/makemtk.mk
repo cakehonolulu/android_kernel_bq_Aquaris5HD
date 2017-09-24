@@ -358,8 +358,6 @@ check-dep: $(PRJ_MF)
 	$(eval include $(MTK_ROOT_BUILD)/addon/core/config.mak)
 	$(if $(filter error,$(DEP_ERR_CNT)),\
                   $(error Dependency Check FAILED!!))
-	@echo "Dependency Check Successfully!!"
-
 
 mtk_dirs_to_clean := \
         $(MTK_ROOT_CUSTOM_OUT) \
@@ -428,7 +426,6 @@ ALL_CUSTOMIMAGE_CLEAN_FILES := \
 
 
 clean-customimage:
-	$(hide) echo $(SHOWTIME) $@ing ...
 	$(hide) rm -rf $(ALL_CUSTOMIMAGE_CLEAN_FILES)
 
 $(ANDROID_NATIVE_TARGETS): $(PRJ_MF) custgen $(filter $(OUT_DIR)/target/product/$(PROJECT)/obj/include/dfo/%,$(MTK_DEPENDENCY_PREGEN_BEFORE_ANDROID)) $(ALLJAVAOPTFILES)
@@ -464,9 +461,6 @@ ifeq ($(HAVE_PREPROCESS_FLOW),true)
 mm: run-preprocess
 endif
 mm:
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) (source build/envsetup.sh;TARGET_PRODUCT=$(TARGET_PRODUCT) FLAVOR=$(FLAVOR) mmm $(MM_PATH) $(MAKEJOBS) $(SNOD) $(DEAL_STDOUT_MM);exit $${PIPESTATUS[0]})  && \
           $(SHOWRSLT) $$? $(LOG)$@.log || \
           $(SHOWRSLT) $$? $(LOG)$@.log
@@ -477,9 +471,6 @@ ifeq ($(HAVE_PREPROCESS_FLOW),true)
 mma: run-preprocess
 endif
 mma:
-	 $(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) (source build/envsetup.sh;TARGET_PRODUCT=$(TARGET_PRODUCT) FLAVOR=$(FLAVOR) mmma $(MM_PATH) $(MAKEJOBS) $(SNOD) $(DEAL_STDOUT_MMA);exit $${PIPESTATUS[0]})  && \
           $(SHOWRSLT) $$? $(LOG)$@.log || \
           $(SHOWRSLT) $$? $(LOG)$@.log
@@ -501,9 +492,6 @@ TRUSTZONE_ALL_PATH :="$(TRUSTZONE_PROTECT_PRIVATE_SECURITY_PATH) $(TRUSTZONE_PRO
 
 trustzone:
 ifeq ($(ACTION),)
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) (source build/envsetup.sh;TARGET_PRODUCT=$(TARGET_PRODUCT) FLAVOR=$(FLAVOR) ONE_SHOT_MAKEFILE=$(TRUSTZONE_ALL_PATH) m $(MAKEJOBS) $(SNOD) $(DEAL_STDOUT_TRUSTZONE);exit $${PIPESTATUS[0]})  && \
           $(SHOWRSLT) $$? $(LOG)$@.log || \
           $(SHOWRSLT) $$? $(LOG)$@.log
@@ -514,9 +502,6 @@ ifeq ($(DUMP),true)
 rel-cust: dump_option := -d
 endif
 rel-cust:
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) python $(MTK_ROOT_BUILD)/tools/customRelease.py $(dump_option) ./ $(RELEASE_DEST) $(TARGET_PRODUCT) $(MTK_RELEASE_PACKAGE).xml $(DEAL_STDOUT_CUSTREL) && \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
@@ -550,18 +535,12 @@ update-modem: clean-modem $(MTK_ALL_CUSTGEN_FILES) check-modem sign-modem
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) ./makeMtk $(FULL_PROJECT) mm build/target/board/ snod $(DEAL_STDOUT_UPDATE_MD) && \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
 
 
 custgen: $(PRJ_MF)
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$(basename $(notdir $@)).log $(LOG)$(basename $(notdir $@)).log_err
 	$(hide) make $(MAKEJOBS) $(MAKE_DEBUG) MTK_CUSTGEN_ERROR=no -f $(MTK_ROOT_BUILD)/custgen.mk $(DEAL_STDOUT_CUSTGEN) && \
 	  $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
 
@@ -569,9 +548,6 @@ sign-image:
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $@ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) perl $(MTK_ROOT_BUILD)/tools/SignTool/SignTool.pl $(PROJECT) $(FULL_PROJECT) $(MTK_SEC_SECRO_AC_SUPPORT) $(MTK_NAND_PAGE_SIZE) $(DEAL_STDOUT_SIGN_IMAGE) && \
 	  $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
           $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
@@ -580,9 +556,6 @@ encrypt-image:
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $@ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) perl $(MTK_ROOT_BUILD)/tools/encrypt_image.pl $(PROJECT) $(DEAL_STDOUT_ENCRYPT_IMAGE) && \
           $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
           $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
@@ -598,9 +571,6 @@ $(MTK_DEPENDENCY_OUTPUT)/sign-modem.dep: | $(MTK_CUSTOM_MODEM_FILES)
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $(basename $(notdir $@))ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$(basename $(notdir $@)).log
-	$(hide) rm -f $(LOG)$(basename $(notdir $@)).log $(LOG)$(basename $(notdir $@)).log_err
 	$(hide) perl $(MTK_ROOT_BUILD)/tools/sign_modem.pl \
                      $(FULL_PROJECT) \
                      $(MTK_SEC_MODEM_ENCODE) \
@@ -646,9 +616,6 @@ ifneq ($(strip $(MODEM_INFO_FLAG)),)
 	$(hide) echo ""
    endif
 else
-	$(hide) echo $(SHOWTIME) $@ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) perl $(PRIVATE_CHK_MD_TOOL) \
                      PROJECT=$(PROJECT) \
                      PRIVATE_MODEM_PATH=$(PRIVATE_MODEM_PATH) \
@@ -674,9 +641,6 @@ $(MTK_DEPENDENCY_OUTPUT)/check-modem.dep: | $(MTK_CUSTOM_MODEM_FILES)
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $(basename $(notdir $@))ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$(basename $(notdir $@)).log
-	$(hide) rm -f $(LOG)$(basename $(notdir $@)).log $(LOG)$(basename $(notdir $@)).log_err
 	$(hide) perl $(PRIVATE_CHK_MD_TOOL) \
                      PROJECT=$(PROJECT) \
                      PRIVATE_MODEM_PATH=$(PRIVATE_MODEM_PATH) \
@@ -695,9 +659,6 @@ dump-memusage: PRIVATE_PROJECT := $(if $(filter emulator, $(PROJECT)),generic,$(
 dump-memusage: MEM_USAGE_DATA_LOCATION := $(MTK_ROOT_BUILD)/tools/memmon/data
 dump-memusage: IMAGE_LOCATION := $(OUT_DIR)/target/product/$(PRIVATE_PROJECT)
 dump-memusage:
-	$(hide) echo $(SHOWTIME) $@ing ...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) perl $(MEM_USAGE_GENERATOR) \
                      $(MEM_USAGE_LABEL) \
                      $(PRIVATE_PROJECT) \
@@ -738,9 +699,6 @@ gen-relkey:
 check-appres: PRIVATE_SCANNING_FOLDERS := packages/apps
 check-appres: PRIVATE_CHECK_TOOL := $(MTK_ROOT_BUILD)/tools/FindDummyRes.py
 check-appres:
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -rf $(LOG)$@.log*
 	$(hide) for d in $(PRIVATE_SCANNING_FOLDERS); do \
                   $(PRIVATE_CHECK_TOOL) -d $$d \
                   $(DEAL_STDOUT_CHK_APPRES); \
@@ -750,9 +708,6 @@ check-appres:
 
 preloader:
 ifeq ($(BUILD_PRELOADER),yes)
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_MODULE_LOG)
-	$(hide) rm -f $(MODULE_LOG) $(MODULE_LOG)_err
   ifneq ($(ACTION), )
 	$(hide) cd $(PRELOADER_WD) && \
 	  (make clean $(DEAL_STDOUT) && \
@@ -773,9 +728,6 @@ endif
 
 trustonic:
 ifeq ($(TRUSTONIC_TEE_SUPPORT),yes)
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_MODULE_LOG)
-	$(hide) rm -f $(MODULE_LOG) $(MODULE_LOG)_err
   ifneq ($(ACTION), )
   else
 	$(hide) cd $(TRUST_TEE_WD)/t-base && \
@@ -798,9 +750,6 @@ else
 lk:
 endif
 ifeq ($(BUILD_LK),yes)
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_MODULE_LOG)
-	$(hide) rm -f $(MODULE_LOG) $(MODULE_LOG)_err
   ifneq ($(ACTION), )
 	$(hide) cd $(LK_WD) && \
 	  (PROJECT=$(PROJECT) make clean $(DEAL_STDOUT) && \
@@ -822,9 +771,6 @@ endif
 
 md32:
 ifeq ($(BUILD_MD32),yes)
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_MODULE_LOG)
-	$(hide) rm -f $(MODULE_LOG) $(MODULE_LOG)_err
   ifneq ($(ACTION), )
 	$(hide) cd $(MD32_WD) && \
 	  (make PROJECT=md32_$(call lc,$(MTK_PLATFORM)) md32_$(call lc,$(MTK_PLATFORM)) clean $(DEAL_STDOUT) && \
@@ -907,9 +853,6 @@ ifneq ($(DR_MODULE),)
 	$(hide) $(MAKECMD) clean-$(DR_MODULE)
    endif
 else
-	$(hide) echo $(SHOWTIME) $(SHOWBUILD)ing $@...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_MODULE_LOG)
-	$(hide) rm -f $(MODULE_LOG) $(MODULE_LOG)_err
   ifeq ($(ACTION),clean)
 	$(hide) ($(MAKECMD) $(ACTION) $(DEAL_STDOUT_CLEAN);exit $${PIPESTATUS[0]}) && \
 	$(SHOWRSLT) $${PIPESTATUS[0]} $(S_CLEAN_LOG) $(ACTION) || \
@@ -959,9 +902,6 @@ bindergen:
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $@ing...
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) $(MTK_ROOT_BUILD)/tools/bindergen/bindergen.pl $(DEAL_STDOUT_BINDERGEN) && \
 	 $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
 	 $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
@@ -971,9 +911,6 @@ check-seandroid:
 ifeq ($(MTK_DEPENDENCY_AUTO_CHECK), true)
 	-@echo [Update] $@: $?
 endif
-	$(hide) echo $(SHOWTIME) $@ing...$(FULL_PROJECT) $(LOGDIR)
-	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) rm -f $(LOG)$@.log $(LOG)$@.log_err
 	$(hide) python $(MTK_ROOT_BUILD)/tools/SEMTK_policy_check.py $(FULL_PROJECT) $(LOGDIR) $(DEAL_STDOUT_CHECK_SEANDROID) && \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
