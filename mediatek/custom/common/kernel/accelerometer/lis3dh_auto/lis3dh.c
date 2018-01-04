@@ -84,7 +84,6 @@ static const struct i2c_device_id lis3dh_i2c_id[] = {{LIS3DH_DEV_NAME,0},{}};
 /*the adapter id will be available in customization*/
 
 static struct i2c_board_info __initdata i2c_LIS3DH={ I2C_BOARD_INFO("LIS3DH", (0x30>>1))};
-extern int holster_status ;
 //static unsigned short lis3dh_force[] = {0x00, LIS3DH_I2C_SLAVE_ADDR, I2C_CLIENT_END, I2C_CLIENT_END};
 //static const unsigned short *const lis3dh_forces[] = { lis3dh_force, NULL };
 //static struct i2c_client_address_data lis3dh_addr_data = { .forces = lis3dh_forces,};
@@ -1997,7 +1996,7 @@ static void lis3dh_early_suspend(struct early_suspend *h)
 	u8 databuf[2]; 
 	int err = 0;
 	u8 addr = LIS3DH_REG_CTL_REG1;
-	if((obj == NULL) ||(holster_status==1))
+	if((obj == NULL))
 	{
 		GSE_ERR("null pointer!!\n");
 		return;
