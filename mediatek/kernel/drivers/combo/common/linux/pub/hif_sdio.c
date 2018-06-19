@@ -1741,6 +1741,15 @@ static void hif_sdio_irq (
         HIF_SDIO_ERR_FUNC("probed_list_index not found!\n");
         return;
     }
+    /* [George] added for sdio irq sync and mmc single_irq workaround. It's set
+     * enabled later by client driver call mtk_wcn_hif_sdio_enable_irq()
+     */
+    /* skip smp_rmb() here */
+    if (MTK_WCN_BOOL_FALSE == g_hif_sdio_probed_func_list[probed_list_index].sdio_irq_enabled) {
+        HIF_SDIO_WARN_FUNC("func(0x%p),probed_idx(%d) sdio irq not enabled yet\n",
+            func, probed_list_index);
+        return;
+    }
 
     registed_list_index = g_hif_sdio_probed_func_list[probed_list_index].clt_idx;
 //    g_hif_sdio_probed_func_list[probed_list_index].interrupted = MTK_WCN_BOOL_TRUE;
@@ -2349,8 +2358,339 @@ INT32 mtk_wcn_hif_sdio_bus_set_power (
     return 0;
 }
 
+void mtk_wcn_hif_sdio_enable_irq(
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    MTK_WCN_BOOL enable
+    )
+{
+    UINT8 probed_idx = CLTCTX_IDX(ctx);
+
+    if (unlikely(!CLTCTX_IDX_VALID(probed_idx))) {   /* invalid index in CLTCTX */
+        HIF_SDIO_WARN_FUNC("invalid idx in ctx(0x%x), sdio_irq no change\n", ctx);
+        return;
+    }
+
+    /* store client driver's private data to dev driver */
+    g_hif_sdio_probed_func_list[probed_idx].sdio_irq_enabled = enable;
+    smp_wmb();
+    HIF_SDIO_INFO_FUNC("ctx(0x%x) sdio irq enable(%d)\n",
+        ctx, (MTK_WCN_BOOL_FALSE == enable) ? 0 : 1);
+
+
+}
+
+static INT32 _hif_sdio_do_autok(
+    struct sdio_func * func
+    )
+{
+    INT32 i_ret = 0;
+
+#if MTK_HIF_SDIO_AUTOK_ENABLED
+    BOOTMODE boot_mode;
+
+    boot_mode = get_boot_mode();
+    if (boot_mode == META_BOOT)
+    {
+        HIF_SDIO_INFO_FUNC("omit autok in meta mode\n");
+        i_ret = 0;
+        return i_ret;
+    }
+    HIF_SDIO_INFO_FUNC("wait_sdio_autok_ready++\n");
+    wait_sdio_autok_ready(func->card->host);
+    HIF_SDIO_INFO_FUNC("wait_sdio_autok_ready--\n");
+	i_ret = 0;
+
+#else
+    HIF_SDIO_ERR_FUNC("autok feature is not enabled.\n");
+#endif
+    return i_ret;
+}
+
+
+INT32 mtk_wcn_hif_sdio_do_autok(
+    MTK_WCN_HIF_SDIO_CLTCTX ctx
+    )
+{
+    INT32 i_ret = 0;
+
+    INT8 probe_index = 0;
+    struct sdio_func *func = NULL;
+    
+    probe_index = CLTCTX_IDX(ctx);
+    func = g_hif_sdio_probed_func_list[probe_index].func;
+	
+	i_ret = _hif_sdio_do_autok(func);
+
+    return i_ret;
+}
+
+#if HIF_SDIO_API_EXTENSION
+/*!
+ * \brief
+ *
+ * detailed descriptions
+ *
+ * \param ctx client's context variable
+ *
+ * \retval 0    register successfully
+ * \retval < 0  list error code here
+ */
+INT32 mtk_wcn_hif_sdio_f0_readb (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    UINT32 offset,
+    PUINT8 pvb
+    )
+{
+#if HIF_SDIO_UPDATE
+    INT32 ret;
+    struct sdio_func* func;
+#else
+    INT32 ret = -HIF_SDIO_ERR_FAIL;
+    int probe_index = -1;
+    struct sdio_func* func = 0;
+#endif
+
+    HIF_SDIO_DBG_FUNC("start!\n");
+    HIF_SDIO_ASSERT( pvb );
+
+    //4 <1> check if ctx is valid, registered, and probed
+#if HIF_SDIO_UPDATE
+    ret = -HIF_SDIO_ERR_FAIL;
+    func = hif_sdio_ctx_to_func(ctx);
+    if (!func) {
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+#else
+    probe_index = CLTCTX_IDX(ctx);
+    if( probe_index < 0 )   /* the function has not been probed */
+    {
+        HIF_SDIO_WARN_FUNC("can't find client in probed list!\n");
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+    else
+    {
+        if ( g_hif_sdio_probed_func_list[probe_index].clt_idx < 0 )   /* the client has not been registered */
+        {
+            HIF_SDIO_WARN_FUNC("can't find client in registered list!\n");
+            ret = -HIF_SDIO_ERR_FAIL;
+            goto out;
+        }
+    }
+    func = g_hif_sdio_probed_func_list[probe_index].func;
+#endif
+
+    //4 <2>
+    sdio_claim_host(func);
+    *pvb = sdio_f0_readb(func, offset, &ret);
+    sdio_release_host(func);
+
+    //4 <3> check result code and return proper error code
+
+out:
+    HIF_SDIO_DBG_FUNC("end!\n");
+    return ret;
+} /* end of mtk_wcn_hif_sdio_f0_readb() */
+
+
+/*!
+ * \brief
+ *
+ * detailed descriptions
+ *
+ * \param ctx client's context variable
+ *
+ * \retval 0    register successfully
+ * \retval < 0  list error code here
+ */
+INT32 mtk_wcn_hif_sdio_f0_writeb (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    UINT32 offset,
+    UINT8 vb
+    )
+{
+#if HIF_SDIO_UPDATE
+    INT32 ret;
+    struct sdio_func* func;
+#else
+    INT32 ret = -HIF_SDIO_ERR_FAIL;
+    int probe_index = -1;
+    struct sdio_func* func = 0;
+#endif
+
+    HIF_SDIO_DBG_FUNC("start!\n");
+
+    //4 <1> check if ctx is valid, registered, and probed
+#if HIF_SDIO_UPDATE
+    ret = -HIF_SDIO_ERR_FAIL;
+    func = hif_sdio_ctx_to_func(ctx);
+    if (!func) {
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+#else
+    probe_index = CLTCTX_IDX(ctx);
+    if( probe_index < 0 )   /* the function has not been probed */
+    {
+        HIF_SDIO_WARN_FUNC("can't find client in probed list!\n");
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+    else
+    {
+        if ( g_hif_sdio_probed_func_list[probe_index].clt_idx < 0 )   /* the client has not been registered */
+        {
+            HIF_SDIO_WARN_FUNC("can't find client in registered list!\n");
+            ret = -HIF_SDIO_ERR_FAIL;
+            goto out;
+        }
+    }
+    func = g_hif_sdio_probed_func_list[probe_index].func;
+#endif
+
+    //4 <1.1> check if input parameters are valid
+
+    //4 <2>
+    wmt_tra_sdio_update();
+    sdio_claim_host(func);
+    sdio_f0_writeb(func, vb, offset, &ret);
+    sdio_release_host(func);
+
+    //4 <3> check result code and return proper error code
+
+out:
+    HIF_SDIO_DBG_FUNC("end!\n");
+    return ret;
+} /* end of mtk_wcn_hif_sdio_f0_writeb() */
+
+
+INT32 mtk_wcn_hif_sdio_deep_sleep (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx
+    )
+{
+#if HIF_SDIO_UPDATE
+    INT32 ret;
+    struct sdio_func* func;
+#else
+    INT32 ret = -HIF_SDIO_ERR_FAIL;
+    int probe_index = -1;
+    struct sdio_func* func = 0;
+#endif
+
+    HIF_SDIO_DBG_FUNC("start!\n");
+
+    //4 <1> check if ctx is valid, registered, and probed
+#if HIF_SDIO_UPDATE
+    ret = -HIF_SDIO_ERR_FAIL;
+    func = hif_sdio_ctx_to_func(ctx);
+    if (!func) {
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+#else
+    probe_index = CLTCTX_IDX(ctx);
+    if( probe_index < 0 )   /* the function has not been probed */
+    {
+        HIF_SDIO_WARN_FUNC("can't find client in probed list!\n");
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+    else
+    {
+        if ( g_hif_sdio_probed_func_list[probe_index].clt_idx < 0 )   /* the client has not been registered */
+        {
+            HIF_SDIO_WARN_FUNC("can't find client in registered list!\n");
+            ret = -HIF_SDIO_ERR_FAIL;
+            goto out;
+        }
+    }
+    func = g_hif_sdio_probed_func_list[probe_index].func;
+#endif
+
+    msdc_sdio_deep_sleep(func->card->host, 0);
+    ret = HIF_SDIO_ERR_SUCCESS;
+
+out:
+    HIF_SDIO_DBG_FUNC("end!\n");
+    return ret;
+} /* end of mtk_wcn_hif_sdio_deep_sleep() */
+
+
+INT32 mtk_wcn_hif_sdio_wake_up(
+    MTK_WCN_HIF_SDIO_CLTCTX ctx
+    )
+{
+#if HIF_SDIO_UPDATE
+    INT32 ret;
+    struct sdio_func* func;
+#else
+    INT32 ret = -HIF_SDIO_ERR_FAIL;
+    int probe_index = -1;
+    struct sdio_func* func = 0;
+#endif
+
+    HIF_SDIO_DBG_FUNC("start!\n");
+
+    //4 <1> check if ctx is valid, registered, and probed
+#if HIF_SDIO_UPDATE
+    ret = -HIF_SDIO_ERR_FAIL;
+    func = hif_sdio_ctx_to_func(ctx);
+    if (!func) {
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+#else
+    probe_index = CLTCTX_IDX(ctx);
+    if( probe_index < 0 )   /* the function has not been probed */
+    {
+        HIF_SDIO_WARN_FUNC("can't find client in probed list!\n");
+        ret = -HIF_SDIO_ERR_FAIL;
+        goto out;
+    }
+    else
+    {
+        if ( g_hif_sdio_probed_func_list[probe_index].clt_idx < 0 )   /* the client has not been registered */
+        {
+            HIF_SDIO_WARN_FUNC("can't find client in registered list!\n");
+            ret = -HIF_SDIO_ERR_FAIL;
+            goto out;
+        }
+    }
+    func = g_hif_sdio_probed_func_list[probe_index].func;
+#endif
+
+    msdc_sdio_wake_up(func->card->host);
+    ret = HIF_SDIO_ERR_SUCCESS;
+
+out:
+    HIF_SDIO_DBG_FUNC("end!\n");
+    return ret;
+} /* end of mtk_wcn_hif_sdio_wake_up() */
+
+
+#endif
+
+#ifdef MTK_WCN_REMOVE_KERNEL_MODULE
+
+int mtk_wcn_hif_sdio_drv_init(void)
+{
+	return hif_sdio_init();
+
+}
+
+void mtk_wcn_hif_sdio_driver_exit (void)
+{
+	return hif_sdio_exit();
+}
+
+
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_drv_init);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_driver_exit);
+#else
 module_init(hif_sdio_init);
 module_exit(hif_sdio_exit);
+#endif
 
 EXPORT_SYMBOL(mtk_wcn_hif_sdio_update_cb_reg);
 EXPORT_SYMBOL(mtk_wcn_hif_sdio_client_reg);
@@ -2366,4 +2706,12 @@ EXPORT_SYMBOL(mtk_wcn_hif_sdio_get_drvdata);
 EXPORT_SYMBOL(mtk_wcn_hif_sdio_wmt_control);
 EXPORT_SYMBOL(mtk_wcn_hif_sdio_bus_set_power);
 EXPORT_SYMBOL(mtk_wcn_hif_sdio_get_dev);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_enable_irq);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_do_autok); 
+#if HIF_SDIO_API_EXTENSION
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_f0_readb);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_f0_writeb);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_deep_sleep);
+EXPORT_SYMBOL(mtk_wcn_hif_sdio_wake_up);
+#endif
 

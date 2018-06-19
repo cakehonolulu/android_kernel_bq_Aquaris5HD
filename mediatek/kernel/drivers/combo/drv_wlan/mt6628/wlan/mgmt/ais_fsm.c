@@ -4340,35 +4340,6 @@ aisFsmRunEventRoamingDiscovery (
     /* search candidates by best rssi */
     prConnSettings->eConnectionPolicy = CONNECT_BY_SSID_BEST_RSSI;
 
-#if CFG_SUPPORT_WFD
-#if CFG_ENABLE_WIFI_DIRECT
-    {
-        /* Check WFD is running */
-        P_BSS_INFO_T prP2pBssInfo = &(prAdapter->rWifiVar.arBssInfo[NETWORK_TYPE_P2P_INDEX]);
-        P_WFD_CFG_SETTINGS_T prWfdCfgSettings = (P_WFD_CFG_SETTINGS_T)NULL;
-        if (prAdapter->fgIsP2PRegistered &&
-                    IS_BSS_ACTIVE(prP2pBssInfo) &&
-                    (prP2pBssInfo->eCurrentOPMode == OP_MODE_ACCESS_POINT ||
-                    prP2pBssInfo->eCurrentOPMode == OP_MODE_INFRASTRUCTURE)) {
-             DBGLOG(ROAMING, INFO, ("Handle roaming when P2P is GC or GO.\n"));
-             if (prAdapter->rWifiVar.prP2pFsmInfo) {
-                prWfdCfgSettings = &(prAdapter->rWifiVar.prP2pFsmInfo->rWfdConfigureSettings);
-                if ((prWfdCfgSettings->ucWfdEnable == 1) &&
-                        ((prWfdCfgSettings->u4WfdFlag & WFD_FLAGS_DEV_INFO_VALID))) {
-                   DBGLOG(ROAMING, INFO, ("WFD is running. Stop roaming.\n"));
-                   roamingFsmRunEventRoam(prAdapter);
-                   roamingFsmRunEventFail(prAdapter, ROAMING_FAIL_REASON_NOCANDIDATE);
-                   return;
-                }
-            }
-            else {
-                ASSERT(0);
-            }
-        } /* fgIsP2PRegistered */ 
-    }
-#endif
-#endif
-
     /* results are still new */
     if (!u4ReqScan) {
         roamingFsmRunEventRoam(prAdapter);

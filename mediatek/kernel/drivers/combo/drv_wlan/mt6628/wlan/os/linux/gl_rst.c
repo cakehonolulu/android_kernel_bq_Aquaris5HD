@@ -398,7 +398,11 @@ int mtk_wifi_bind(
 
     /* collect PID */
     if(num_bind_process < MAX_BIND_PROCESS) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
+        bind_pid[num_bind_process] = info->snd_portid;
+#else
         bind_pid[num_bind_process] = info->snd_pid;
+#endif
         num_bind_process++;
         }
     else {

@@ -742,7 +742,11 @@ static struct cfg80211_ops mtk_p2p_config_ops = {
 #endif
     .set_wiphy_params = mtk_p2p_cfg80211_set_wiphy_params,
     .del_station = mtk_p2p_cfg80211_del_station,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)    
+    .set_monitor_channel = mtk_p2p_cfg80211_set_channel,
+#else    
     .set_channel = mtk_p2p_cfg80211_set_channel,
+#endif
     .set_bitrate_mask = mtk_p2p_cfg80211_set_bitrate_mask,
     .mgmt_frame_register = mtk_p2p_cfg80211_mgmt_frame_register,
     .get_station            = mtk_p2p_cfg80211_get_station,
@@ -1541,7 +1545,9 @@ glRegisterP2P(
     prGlueInfo->prP2PInfo->wdev.wiphy->max_remain_on_channel_duration = 5000;
     prGlueInfo->prP2PInfo->wdev.wiphy->n_cipher_suites = 5;
 	prGlueInfo->prP2PInfo->wdev.wiphy->cipher_suites = (const u32*)cipher_suites;
-	prGlueInfo->prP2PInfo->wdev.wiphy->flags = WIPHY_FLAG_CUSTOM_REGULATORY | WIPHY_FLAG_HAS_REMAIN_ON_CHANNEL;
+	prGlueInfo->prP2PInfo->wdev.wiphy->flags = WIPHY_FLAG_CUSTOM_REGULATORY | WIPHY_FLAG_HAS_REMAIN_ON_CHANNEL | 
+						   WIPHY_FLAG_HAVE_AP_SME;
+	prGlueInfo->prP2PInfo->wdev.wiphy->ap_sme_capa = 1;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32)
     prGlueInfo->prP2PInfo->wdev.wiphy->max_scan_ssids = MAX_SCAN_LIST_NUM;

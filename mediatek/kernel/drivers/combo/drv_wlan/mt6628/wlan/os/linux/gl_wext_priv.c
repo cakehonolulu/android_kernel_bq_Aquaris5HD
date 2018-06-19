@@ -1029,8 +1029,8 @@ priv_get_int (
         kalMemCopy(&prNdisReq->ndisOidContent[0], &pu4IntBuf[1], 8);
 
         prNdisReq->ndisOidCmd = OID_CUSTOM_MEM_DUMP;
-        prNdisReq->inNdisOidlength = 8;
-        prNdisReq->outNdisOidLength = 8;
+        prNdisReq->inNdisOidlength = sizeof(PARAM_CUSTOM_MEM_DUMP_STRUC_T);
+        prNdisReq->outNdisOidLength = sizeof(PARAM_CUSTOM_MEM_DUMP_STRUC_T);
 
         status = priv_get_ndis(prNetDev, prNdisReq, &u4BufLen);
         if (status == 0) {

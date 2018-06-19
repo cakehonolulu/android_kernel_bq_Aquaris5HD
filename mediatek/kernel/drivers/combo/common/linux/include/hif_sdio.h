@@ -30,6 +30,7 @@
 ********************************************************************************
 */
 #define HIF_SDIO_DEBUG  (0) /* 0:trun off debug msg and assert, 1:trun off debug msg and assert */
+#define HIF_SDIO_API_EXTENSION      (0)
 
 /*******************************************************************************
 *                    E X T E R N A L   R E F E R E N C E S
@@ -47,6 +48,7 @@
 #include <linux/interrupt.h>
 #include <linux/vmalloc.h>
 
+#include <asm/atomic.h>
 
 #include "osal_typedef.h"
 #include "osal.h"
@@ -113,6 +115,8 @@ typedef struct _MTK_WCN_HIF_SDIO_PROBEINFO {
     struct sdio_func* func;  /* probed sdio function pointer */
     void* private_data_p;  /* clt's private data pointer */
     MTK_WCN_BOOL on_by_wmt;   /* TRUE: on by wmt, FALSE: not on by wmt */
+	/* added for sdio irq sync and mmc single_irq workaround */
+    MTK_WCN_BOOL sdio_irq_enabled; /* TRUE: can handle sdio irq; FALSE: no sdio irq handling */
     INT8 clt_idx;   /* registered function table info element number (initial value is -1) */
 } MTK_WCN_HIF_SDIO_PROBEINFO;
 
@@ -296,9 +300,36 @@ extern INT32 mtk_wcn_hif_sdio_update_cb_reg(
     int (*ts_update)(void)
     );
 
+extern void mtk_wcn_hif_sdio_enable_irq(
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    MTK_WCN_BOOL enable
+    );
 
 INT32 mtk_wcn_hif_sdio_tell_chipid(INT32 chipId);
 INT32 mtk_wcn_hif_sdio_query_chipid(INT32 waitFlag);
+
+#if HIF_SDIO_API_EXTENSION
+extern INT32 mtk_wcn_hif_sdio_f0_readb (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    UINT32 offset,
+    PUINT8 pvb
+    );
+
+extern INT32 mtk_wcn_hif_sdio_f0_writeb (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx,
+    UINT32 offset,
+    UINT8 vb
+    );
+
+extern INT32 mtk_wcn_hif_sdio_deep_sleep (
+    MTK_WCN_HIF_SDIO_CLTCTX ctx
+    );
+
+extern INT32 mtk_wcn_hif_sdio_wake_up(
+    MTK_WCN_HIF_SDIO_CLTCTX ctx
+    );
+
+#endif
 
 /*******************************************************************************
 *                              F U N C T I O N S

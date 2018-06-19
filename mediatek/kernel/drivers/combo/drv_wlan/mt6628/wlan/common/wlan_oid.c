@@ -12,10 +12,6 @@
 /*
 ** $Log: wlan_oid.c $
 **
-** 01 17 2013 george.huang
-** [ALPS00444577] ?Lenovo A820t??Pre-test??????Critical??wifi??wifi??????????????
-** Rollback //ALPS_SW/MP/ALPS.JB2.MP/alps/mediatek/kernel/drivers/combo/drv_wlan/mt6628/wlan/common/wlan_oid.c to revision 1
-**
 ** 07 19 2012 yuche.tsai
 ** NULL
 ** Code update for JB.
@@ -5748,6 +5744,13 @@ wlanoidSetSwCtrlWrite (
             else if(u2SubId == 0x5) {
                 prAdapter->rWifiVar.rConnSettings.uc2G4BandwidthMode = (UINT_8)u4Data;
             }
+            else if(u2SubId == 0x0100) {
+                prAdapter->rWifiVar.u8SupportRxGf = (UINT_8)u4Data;
+            }
+            else if(u2SubId == 0x0101) {
+                prAdapter->rWifiVar.u8SupportRxSgi20 = (UINT_8)u4Data;
+                prAdapter->rWifiVar.u8SupportRxSgi40 = (UINT_8)u4Data;
+            }
 
 
             break;
@@ -5807,7 +5810,6 @@ wlanoidSetSwCtrlWrite (
 #endif
         case 0xFFFF:
             {
-            CMD_ACCESS_REG rCmdAccessReg;
 #if 1 //CFG_MT6573_SMT_TEST
             if (u2SubId == 0x0123) {
 
@@ -8447,7 +8449,7 @@ wlanSendSetQueryCmd (
 
     // increase command sequence number
     ucCmdSeqNum = nicIncreaseCmdSeqNum(prAdapter);
-    DBGLOG(REQ, TRACE, ("ucCmdSeqNum =%d\n", ucCmdSeqNum));
+    DBGLOG(REQ, TRACE, ("ucCmdSeqNum =%d, ucCID =%d\n", ucCmdSeqNum, ucCID));
 
     // Setup common CMD Info Packet
     prCmdInfo->eCmdType = COMMAND_TYPE_NETWORK_IOCTL;
@@ -10582,6 +10584,7 @@ wlanoidSetP2pMode (
 
     ASSERT(prAdapter);
     ASSERT(pu4SetInfoLen);
+	printk("wlanoidSetP2pMode init status=0x%x \n", status);
 
     *pu4SetInfoLen = sizeof(PARAM_CUSTOM_P2P_SET_STRUC_T);
     if (u4SetBufferLen < sizeof(PARAM_CUSTOM_P2P_SET_STRUC_T)) {
@@ -10637,7 +10640,7 @@ wlanoidSetP2pMode (
             (P_MSG_HDR_T)prP2pNetdevRegMsg,
             MSG_SEND_METHOD_BUF);
 #endif
-
+	printk("wlanoidSetP2pMode return status=0x%x \n", status);
     return status;
 
 }
