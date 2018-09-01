@@ -1590,7 +1590,7 @@ wlanAdapterStart (
                 UINT_32     u4MailBox0;
 
                 nicGetMailbox(prAdapter, 0, &u4MailBox0);
-                DBGLOG(INIT, ERROR, ("Waiting for Ready bit: Timeout, ID=%d\n",
+                DBGLOG(INIT, ERROR, ("Waiting for Ready bit: Timeout, ID=%lu\n",
                         (u4MailBox0 & 0x0000FFFF)));
                 u4Status = WLAN_STATUS_FAILURE;
                 break;
@@ -1701,7 +1701,7 @@ wlanAdapterStart (
 
         prAdapter->u4MaxSpLen = prRegInfo->u4MaxSpLen;
 
-        DBGLOG(INIT, TRACE, ("[1] fgEnArpFilter:0x%x, u4UapsdAcBmp:0x%x, u4MaxSpLen:0x%x",
+        DBGLOG(INIT, TRACE, ("[1] fgEnArpFilter:0x%lx, u4UapsdAcBmp:0x%lx, u4MaxSpLen:0x%lx",
                 prAdapter->fgEnArpFilter,
                 prAdapter->u4UapsdAcBmp,
                 prAdapter->u4MaxSpLen));
@@ -2224,7 +2224,7 @@ wlanSendCommand (
 
             if (prCmdInfo->fgSetQuery) {
                 HAL_MCR_WR(prAdapter,
-                        (prCmdAccessReg->u4Address & BITS(2,31)), //address is in DWORD unit
+                        (unsigned)(prCmdAccessReg->u4Address & BITS(2,31)), //address is in DWORD unit
                         prCmdAccessReg->u4Data);
             }
             else {
@@ -2236,7 +2236,7 @@ wlanSendCommand (
                 prEventAccessReg->u4Address = u4Address;
 
                 HAL_MCR_RD(prAdapter,
-                       prEventAccessReg->u4Address & BITS(2,31), //address is in DWORD unit
+                       (unsigned)(prEventAccessReg->u4Address & BITS(2,31)), //address is in DWORD unit
                        &prEventAccessReg->u4Data);
             }
         }
@@ -3947,7 +3947,7 @@ wlanProcessSecurityFrame(
             QUEUE_REMOVE_HEAD(&prAdapter->rFreeCmdList, prCmdInfo, P_CMD_INFO_T);
             KAL_RELEASE_SPIN_LOCK(prAdapter, SPIN_LOCK_CMD_RESOURCE);
 
-            DBGLOG(RSN, INFO, ("T1X len=%d\n", u4PacketLen));
+            DBGLOG(RSN, INFO, ("T1X len=%lu\n", u4PacketLen));
 
             if (prCmdInfo) {
                 P_STA_RECORD_T          prStaRec;

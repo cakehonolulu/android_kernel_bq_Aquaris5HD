@@ -2083,7 +2083,7 @@ aisFsmSteps (
 
         case AIS_STATE_WAIT_FOR_NEXT_SCAN:
 
-            DBGLOG(AIS, LOUD, ("SCAN: Idle Begin - Current Time = %ld\n", kalGetTimeTick()));
+            DBGLOG(AIS, LOUD, ("SCAN: Idle Begin - Current Time = %u\n", kalGetTimeTick()));
 
             cnmTimerStartTimer(prAdapter,
                     &prAisFsmInfo->rBGScanTimer,
@@ -2323,7 +2323,7 @@ aisFsmRunEventScanDone (
     ASSERT(prAdapter);
     ASSERT(prMsgHdr);
 
-    DBGLOG(AIS, LOUD, ("EVENT-SCAN DONE: Current Time = %ld\n", kalGetTimeTick()));
+    DBGLOG(AIS, LOUD, ("EVENT-SCAN DONE: Current Time = %u\n", kalGetTimeTick()));
 
     prAisFsmInfo = &(prAdapter->rWifiVar.rAisFsmInfo);
     prConnSettings = &(prAdapter->rWifiVar.rConnSettings);
@@ -3830,7 +3830,7 @@ aisFsmRunEventBGSleepTimeOut (
 
     switch (prAisFsmInfo->eCurrentState) {
     case AIS_STATE_WAIT_FOR_NEXT_SCAN:
-        DBGLOG(AIS, LOUD, ("EVENT - SCAN TIMER: Idle End - Current Time = %ld\n", kalGetTimeTick()));
+        DBGLOG(AIS, LOUD, ("EVENT - SCAN TIMER: Idle End - Current Time = %u\n", kalGetTimeTick()));
 
         eNextState = AIS_STATE_LOOKING_FOR;
 

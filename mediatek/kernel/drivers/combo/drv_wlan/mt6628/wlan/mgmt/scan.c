@@ -2422,7 +2422,7 @@ scanSearchBssDescByPolicy (
     }
 #endif
 
-    DBGLOG(SCN, INFO, ("SEARCH: Num Of BSS_DESC_T = %d, Look for SSID: %s\n",
+    DBGLOG(SCN, INFO, ("SEARCH: Num Of BSS_DESC_T = %lu, Look for SSID: %s\n",
         prBSSDescList->u4NumElem, prConnSettings->aucSSID));
 
 

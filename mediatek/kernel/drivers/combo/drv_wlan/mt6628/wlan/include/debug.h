@@ -304,17 +304,15 @@ typedef enum _ENUM_DBG_MODULE_T {
         { \
             if (aucDebugModule[DBG_##_Module##_IDX] & DBG_CLASS_##_Class) { \
                 if (DBG_CLASS_##_Class == DBG_CLASS_ERROR) { \
-                    LOG_FUNC_TIME("**Error[%s:%d]-", __FILE__, __LINE__); \
-                    LOG_FUNC("%s: (" #_Module " " #_Class ") ", __FUNCTION__); \
-                } \
-                else if (DBG_CLASS_##_Class == DBG_CLASS_WARN) { \
-                    LOG_FUNC_TIME("**Warning[%s:%d]-", __FILE__, __LINE__); \
+                    LOG_FUNC_TIME("[wlan] **Error[%s:%d]-", __FILE__, __LINE__); \
                     LOG_FUNC("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
                 } \
-                else if (DBG_CLASS_##_Class == DBG_CLASS_EVENT) { \
+                else if (DBG_CLASS_##_Class == DBG_CLASS_WARN) { \
+                    LOG_FUNC_TIME("[wlan] **Warning[%s:%d]-", __FILE__, __LINE__); \
+                    LOG_FUNC("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
                 } \
                 else { \
-                    LOG_FUNC_TIME("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
+                    LOG_FUNC("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
                 } \
                 LOG_FUNC _Fmt; \
             } \
@@ -387,7 +385,7 @@ typedef enum _ENUM_DBG_MODULE_T {
 	            LOG_FUNC("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
 	        } \
 	        else { \
-	            LOG_FUNC_TIME("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
+                LOG_FUNC("[wlan] %s: (" #_Module " " #_Class ") ", __FUNCTION__); \
 	        } \
 	        LOG_FUNC _Fmt; \
        } \

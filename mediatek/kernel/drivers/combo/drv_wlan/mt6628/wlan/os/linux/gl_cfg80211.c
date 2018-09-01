@@ -526,7 +526,7 @@ mtk_cfg80211_scan (
     P_GLUE_INFO_T prGlueInfo = NULL;
     WLAN_STATUS rStatus;
     UINT_32 u4BufLen;
-    PARAM_SCAN_REQUEST_EXT_T rScanRequest;
+    static PARAM_SCAN_REQUEST_EXT_T rScanRequest;
 
     prGlueInfo = (P_GLUE_INFO_T) wiphy_priv(wiphy);
     ASSERT(prGlueInfo);

@@ -676,7 +676,7 @@ nicTxReleaseResource (
             prTxCtrl->rTc.aucFreeBufferCount[i] += aucTxRlsCnt[i];
 
             if ((i==1) || (i==5)){
-                DBGLOG(TX, EVENT, ("Release: i = %d aucFreeBufferCount = %d\n",
+                DBGLOG(TX, EVENT, ("Release: i = %lu aucFreeBufferCount = %u\n",
                     i, prTxCtrl->rTc.aucFreeBufferCount[i]));
             }
         }

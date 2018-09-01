@@ -2275,6 +2275,8 @@ p2pFuncParseBeaconContent (
                                 (u2SubTypeVersion == VERSION_WPA)) {
                             kalP2PSetCipher(prAdapter->prGlueInfo, IW_AUTH_CIPHER_TKIP);
                             ucNewSecMode = TRUE;
+                            kalMemCopy(prP2pSpecificBssInfo->aucWpaIeBuffer, pucIE, IE_SIZE(pucIE));
+                            prP2pSpecificBssInfo->u2WpaIeLen = IE_SIZE(pucIE);
                         }
                         else if ((ucOuiType == VENDOR_OUI_TYPE_WPS)) {
                             kalP2PUpdateWSC_IE(prAdapter->prGlueInfo, 0, pucIE, IE_SIZE(pucIE));
@@ -3893,6 +3895,8 @@ WLAN_STATUS wfdChangeMediaState(
 #if CFG_SUPPORT_WFD
 
 	P_WFD_CFG_SETTINGS_T prWfdCfgSettings = (P_WFD_CFG_SETTINGS_T)NULL;
+	if (prAdapter->fgIsP2PRegistered == FALSE)
+		return WLAN_STATUS_SUCCESS;
     prWfdCfgSettings = &prAdapter->rWifiVar.prP2pFsmInfo->rWfdConfigureSettings;
 
     if ((prWfdCfgSettings->ucWfdEnable) &&

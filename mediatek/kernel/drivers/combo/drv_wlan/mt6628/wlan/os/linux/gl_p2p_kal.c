@@ -1223,7 +1223,7 @@ kalP2PIndicateMgmtTxStatus (
         if ((prGlueInfo == NULL) ||
                 (pucFrameBuf == NULL) ||
                 (u4FrameLen == 0)) {
-            DBGLOG(P2P, TRACE, ("Unexpected pointer PARAM. 0x%lx, 0x%lx, %ld.", prGlueInfo, pucFrameBuf, u4FrameLen));
+            DBGLOG(P2P, TRACE, ("Unexpected pointer PARAM. 0x%p, 0x%p, %lu", prGlueInfo, pucFrameBuf, u4FrameLen));
             ASSERT(FALSE);
             break;
         }

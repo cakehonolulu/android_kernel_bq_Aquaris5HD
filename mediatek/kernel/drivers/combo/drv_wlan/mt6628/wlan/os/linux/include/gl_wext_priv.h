@@ -151,6 +151,7 @@
 #define IOCTL_SET_STRUCT_FOR_EM         (SIOCIWFIRSTPRIV + 11)
 #define IOCTL_SET_INTS                  (SIOCIWFIRSTPRIV + 12)
 #define IOCTL_GET_INTS                  (SIOCIWFIRSTPRIV + 13)
+#define IOCTL_SET_STRING                (SIOCIWFIRSTPRIV + 14) /* ++ TDLS */
 
 #define PRIV_CMD_REG_DOMAIN             0
 #define PRIV_CMD_BEACON_PERIOD          1
@@ -201,6 +202,12 @@
 
 #define PRIV_CMD_GET_BUILD_DATE_CODE    29
 
+#define PRIV_CMD_GET_DEBUG_CODE         30
+/* ++ TDLS */
+#define PRIV_CMD_OTHER                  31
+/* other string command ID */
+#define PRIV_CMD_OTHER_TDLS             0x00
+/* -- TDLS */
 /* 802.3 Objects (Ethernet) */
 #define OID_802_3_CURRENT_ADDRESS           0x01010102
 
@@ -380,6 +387,14 @@ priv_get_struct (
     IN struct iw_request_info *prIwReqInfo,
     IN union iwreq_data *prIwReqData,
     IN OUT char *pcExtra
+    );
+
+int
+priv_set_string(
+    IN struct net_device *prNetDev,
+    IN struct iw_request_info *prIwReqInfo,
+    IN union iwreq_data *prIwReqData,
+    IN char *pcExtra
     );
 
 int
