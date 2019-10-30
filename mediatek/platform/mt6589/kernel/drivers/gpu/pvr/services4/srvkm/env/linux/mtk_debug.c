@@ -402,8 +402,8 @@ static IMG_VOID MTKPPInit(IMG_VOID)
 		int max_line;
 	} mtk_pp_register_tabls[] =
 	{	
-		{MTK_PP_R_SGXOSTimer,	MTK_PP_B_QUEUEBUFFER,	1024 * 1024 * 2,  1024 * 64},
-		{MTK_PP_R_DEVMEM,		MTK_PP_B_RINGBUFFER,	1024 * 1024 * 2,  1024 * 64},
+		{MTK_PP_R_SGXOSTimer,	MTK_PP_B_QUEUEBUFFER,	1024 * 1024 * 2,  64 * 1024},
+		{MTK_PP_R_DEVMEM,		MTK_PP_B_RINGBUFFER,	1024 * 1024 * 2,	1024},
 	};
 
 	for (i = 0; i < MTK_PP_R_SIZE; ++i)

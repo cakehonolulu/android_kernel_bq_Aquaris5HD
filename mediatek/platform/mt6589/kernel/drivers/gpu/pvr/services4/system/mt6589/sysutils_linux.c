@@ -163,8 +163,27 @@ PVRSRV_ERROR EnableSGXClocks(SYS_DATA *psSysData)
 		}
 	}
 #endif
+	// MTK, check flag.
+    {
+        int count = 0;
+        int state = 0;
+        do
+        {
+            state = readl((void*)(0xf0006214)) & 0x1F;
+
+            if (state != 0x12)
+            {
+                count ++;
+                PVR_DPF((PVR_DBG_ERROR, "readl((void*)(0xf0006214)) & 0x1F = %d, try=%d", state, count));
+            }
+        }
+        while( state != 0x12 && count < 3 );
+    }
 
     MtkSetKeepFreq();
+
+    OSWaitus(10);
+
     if(( g_pmic_cid != 0) && (get_gpu_power_src()==0))
     {
         upmu_set_rg_vrf18_2_modeset(1); // force PWM mode
