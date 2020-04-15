@@ -1,4 +1,4 @@
-include $(srctree)/../mediatek/build/Makefile
+include $(srctree)/./mediatek/build/Makefile
 ifneq ($(KBUILD_SRC),)
 $(call codebase-path,kernel,$(srctree)/..)
 else
