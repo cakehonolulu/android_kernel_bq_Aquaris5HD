@@ -28,7 +28,6 @@ EXPORT_SYMBOL(PartInfo);
 struct MBR_EBR_struct MBR_EBR_px[MBR_COUNT]={
 	{"mbr", {1, 2, 3, 4, }},
 	{"ebr1", {5, 6, 7, }},
-	{"ebr2", {8, }},
 };
 
 EXPORT_SYMBOL(MBR_EBR_px);
