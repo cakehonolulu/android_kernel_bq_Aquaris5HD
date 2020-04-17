@@ -164,7 +164,8 @@ if [ ! -z $KMOD_PATH ]; then
 fi
 
 echo "**** Building ****"
-make ${makeflags} ${makejobs} ${makedefs}
+
+make -j4 ${makeflags} ${makejobs} ${makedefs}
 
 if [ $? -ne 0 ]; then exit 1; fi
 
