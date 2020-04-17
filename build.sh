@@ -165,7 +165,7 @@ fi
 
 echo "**** Building ****"
 
-make -j4 ${makeflags} ${makejobs} ${makedefs}
+make ${makeflags} ${makejobs} ${makedefs} -j4
 
 if [ $? -ne 0 ]; then exit 1; fi
 
