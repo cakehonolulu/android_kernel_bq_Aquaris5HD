@@ -16,7 +16,7 @@
 #include "mach/mt_mon.h"
 // FIX-ME mark for porting
 //#include "mach/mt_dcm.h"
-#include <../../kernel/kernel/trace/trace.h>
+#include "../../../../kernel/trace/trace.h"
  
 
 #define MON_LOG_BUFF_LEN    (64 * 1024)

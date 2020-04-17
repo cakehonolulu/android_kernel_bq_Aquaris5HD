@@ -7,7 +7,7 @@
 #include <trace/events/mt65xx_mon_trace.h>
 #include <linux/workqueue.h>
 
-#include <../../kernel/kernel/trace/trace.h>
+#include "../../../kernel/trace/trace.h"
 #include "mach/mt_mon.h"
 
 static struct trace_array *mt65xx_mon_trace;
