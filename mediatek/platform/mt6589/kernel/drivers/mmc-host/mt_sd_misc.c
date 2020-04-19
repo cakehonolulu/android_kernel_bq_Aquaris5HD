@@ -1,3 +1,72 @@
+/* Copyright Statement:
+ *
+ * This software/firmware and related documentation ("MediaTek Software") are
+ * protected under relevant copyright laws. The information contained herein
+ * is confidential and proprietary to MediaTek Inc. and/or its licensors.
+ * Without the prior written permission of MediaTek inc. and/or its licensors,
+ * any reproduction, modification, use or disclosure of MediaTek Software,
+ * and information contained herein, in whole or in part, shall be strictly prohibited.
+ */
+/* MediaTek Inc. (C) 2010. All rights reserved.
+ *
+ * BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+ * THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
+ * RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
+ * AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+ * NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+ * SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+ * SUPPLIED WITH THE MEDIATEK SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
+ * THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. RECEIVER EXPRESSLY ACKNOWLEDGES
+ * THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY THIRD PARTY ALL PROPER LICENSES
+ * CONTAINED IN MEDIATEK SOFTWARE. MEDIATEK SHALL ALSO NOT BE RESPONSIBLE FOR ANY MEDIATEK
+ * SOFTWARE RELEASES MADE TO RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR
+ * STANDARD OR OPEN FORUM. RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND
+ * CUMULATIVE LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
+ * AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
+ * OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER TO
+ * MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
+ *
+ * The following software/firmware and/or related documentation ("MediaTek Software")
+ * have been modified by MediaTek Inc. All revisions are subject to any receiver's
+ * applicable license agreements with MediaTek Inc.
+ */
+
+/*****************************************************************************
+*  Copyright Statement:
+*  --------------------
+*  This software is protected by Copyright and the information contained
+*  herein is confidential. The software may not be copied and the information
+*  contained herein may not be used or disclosed except with the written
+*  permission of MediaTek Inc. (C) 2008
+*
+*  BY OPENING THIS FILE, BUYER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+*  THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
+*  RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO BUYER ON
+*  AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+*  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+*  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+*  NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+*  SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+*  SUPPLIED WITH THE MEDIATEK SOFTWARE, AND BUYER AGREES TO LOOK ONLY TO SUCH
+*  THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. MEDIATEK SHALL ALSO
+*  NOT BE RESPONSIBLE FOR ANY MEDIATEK SOFTWARE RELEASES MADE TO BUYER'S
+*  SPECIFICATION OR TO CONFORM TO A PARTICULAR STANDARD OR OPEN FORUM.
+*
+*  BUYER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND CUMULATIVE
+*  LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
+*  AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
+*  OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY BUYER TO
+*  MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
+*
+*  THE TRANSACTION CONTEMPLATED HEREUNDER SHALL BE CONSTRUED IN ACCORDANCE
+*  WITH THE LAWS OF THE STATE OF CALIFORNIA, USA, EXCLUDING ITS CONFLICT OF
+*  LAWS PRINCIPLES.  ANY DISPUTES, CONTROVERSIES OR CLAIMS ARISING THEREOF AND
+*  RELATED THERETO SHALL BE SETTLED BY ARBITRATION IN SAN FRANCISCO, CA, UNDER
+*  THE RULES OF THE INTERNATIONAL CHAMBER OF COMMERCE (ICC).
+*
+*****************************************************************************/
 #include <linux/autoconf.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -18,7 +87,7 @@
 #include <linux/mmc/sd.h>
 #include <linux/mmc/sdio.h>
 #include <linux/dma-mapping.h>
-
+#include <linux/genhd.h>
 #include <mach/dma.h>
 #include <mach/board.h> /* FIXME */
 #include <mach/mt_reg_base.h>
@@ -27,7 +96,7 @@
 #include "mt_sd.h"
 #include <sd_misc.h>
 #include "board-custom.h"
-#include "../../../../../../drivers/mmc/card/queue.h"
+#include "../../../../../drivers/mmc/card/queue.h"
 
 #ifndef FPGA_PLATFORM
 #include <mach/mt_clkmgr.h>
@@ -97,6 +166,9 @@ static int simple_sd_ioctl_single_rw(struct msdc_ioctl* msdc_ctl)
     struct mmc_command msdc_cmd;
     struct mmc_request msdc_mrq;
     struct msdc_host *host_ctl;
+
+    if(msdc_ctl->total_size <= 0)
+        return -EINVAL;
    
     host_ctl = mtk_msdc_host[msdc_ctl->host_num];
     BUG_ON(!host_ctl);
@@ -213,6 +285,9 @@ static int simple_sd_ioctl_single_rw(struct msdc_ioctl* msdc_ctl)
         }
     }
 
+    /* clear the global buffer of R/W IOCTL */
+    memset(sg_msdc_multi_buffer, 0 , 512);
+
     if (msdc_ctl->partition){
         mmc_send_ext_csd(host_ctl->mmc->card,l_buf);
 
@@ -247,6 +322,9 @@ int simple_sd_ioctl_multi_rw(struct msdc_ioctl* msdc_ctl)
     struct mmc_command msdc_stop;
     struct mmc_request  msdc_mrq;
     struct msdc_host *host_ctl;
+
+    if(msdc_ctl->total_size <= 0)
+        return -EINVAL;
    
     host_ctl = mtk_msdc_host[msdc_ctl->host_num];
     BUG_ON(!host_ctl);
@@ -361,6 +439,9 @@ int simple_sd_ioctl_multi_rw(struct msdc_ioctl* msdc_ctl)
             memcpy(msdc_ctl->buffer, sg_msdc_multi_buffer, msdc_ctl->total_size);
         }
     }
+
+    /* clear the global buffer of R/W IOCTL */
+    memset(sg_msdc_multi_buffer, 0 , msdc_ctl->total_size);
 
     if (msdc_ctl->partition){
         mmc_send_ext_csd(host_ctl->mmc->card,l_buf);
@@ -903,7 +984,7 @@ static int simple_mmc_get_disk_info(struct mbr_part_info* mpi, unsigned char* na
 #if DEBUG_MMC_IOCTL
                 printk("part_name = %s    name = %s\n", PartInfo[i].name, name);
 #endif                
-                if (!strncmp(PartInfo[i].name, name, 25)){
+                if (!strncmp(PartInfo[i].name, name, PARTITION_META_INFO_VOLNAMELTH)){
                     mpi->start_sector = part->start_sect;           
                     mpi->nr_sects = part->nr_sects;           
                     mpi->part_no = part->partno; 
@@ -989,7 +1070,10 @@ int simple_mmc_erase_partition(unsigned char* name)
 
 static int simple_mmc_erase_partition_wrap(struct msdc_ioctl* msdc_ctl)
 {
-    unsigned char name[25];
+    unsigned char name[PARTITION_META_INFO_VOLNAMELTH];
+
+    if(msdc_ctl->total_size > PARTITION_META_INFO_VOLNAMELTH)
+        return -EFAULT;
 
     if (copy_from_user(name, (unsigned char*)msdc_ctl->buffer, msdc_ctl->total_size))
         return -EFAULT;
@@ -999,59 +1083,67 @@ static int simple_mmc_erase_partition_wrap(struct msdc_ioctl* msdc_ctl)
 
 static long simple_sd_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
-    struct msdc_ioctl *msdc_ctl = (struct msdc_ioctl *)arg;
+    struct msdc_ioctl msdc_ctl;
 	int ret;
-	if(msdc_ctl == NULL){
+
+	if((struct msdc_ioctl*)arg == NULL){
 		switch(cmd){
-			//#ifdef MTK_SD_REINIT_SUPPORT
 			case MSDC_REINIT_SDCARD:
-				ret = sd_ioctl_reinit(msdc_ctl);
+				ret = sd_ioctl_reinit(NULL);
 				break;
-			//#endif
         	default:
             printk("mt_sd_ioctl:this opcode value is illegal!!\n");
             return -EINVAL;
 			}
 		return ret;		
 	}
-	else{	
-    switch (msdc_ctl->opcode){
-        case MSDC_SINGLE_READ_WRITE:
-            msdc_ctl->result = simple_sd_ioctl_single_rw(msdc_ctl);
-            break;
-        case MSDC_MULTIPLE_READ_WRITE:
-            msdc_ctl->result = simple_sd_ioctl_multi_rw(msdc_ctl);
-            break;
-        case MSDC_GET_CID:
-            msdc_ctl->result = simple_sd_ioctl_get_cid(msdc_ctl);
-            break;
-        case MSDC_GET_CSD:
-            msdc_ctl->result = simple_sd_ioctl_get_csd(msdc_ctl);
-            break;
-        case MSDC_GET_EXCSD:
-            msdc_ctl->result = simple_sd_ioctl_get_excsd(msdc_ctl);
-            break;
-        case MSDC_DRIVING_SETTING:
-            printk("in ioctl to change driving\n");
-            if (1 == msdc_ctl->iswrite){
-                msdc_ctl->result = simple_sd_ioctl_set_driving(msdc_ctl);
-            } else {
-                msdc_ctl->result = simple_sd_ioctl_get_driving(msdc_ctl);
-            }
-            break;
-        case MSDC_ERASE_PARTITION:
-            msdc_ctl->result = simple_mmc_erase_partition_wrap(msdc_ctl);
-            break;
-		case MSDC_SD30_MODE_SWITCH:
-			msdc_ctl->result = simple_sd_ioctl_sd30_mode_switch(msdc_ctl);
-			break;
-        default:
-            printk("simple_sd_ioctl:this opcode value is illegal!!\n");
-            return -EINVAL;
-    }
+	else{
+        if (copy_from_user(&msdc_ctl, (struct msdc_ioctl*)arg, sizeof(struct msdc_ioctl))){
+            return -EFAULT;
+        }
 
-    return msdc_ctl->result;
-}
+        if (msdc_ctl.host_num >= HOST_MAX_NUM || msdc_ctl.host_num < 0)
+            return -EFAULT;
+
+        switch (msdc_ctl.opcode){
+            case MSDC_SINGLE_READ_WRITE:
+                msdc_ctl.result = simple_sd_ioctl_single_rw(&msdc_ctl);
+                break;
+            case MSDC_MULTIPLE_READ_WRITE:
+                msdc_ctl.result = simple_sd_ioctl_multi_rw(&msdc_ctl);
+                break;
+            case MSDC_GET_CID:
+                msdc_ctl.result = simple_sd_ioctl_get_cid(&msdc_ctl);
+                break;
+            case MSDC_GET_CSD:
+                msdc_ctl.result = simple_sd_ioctl_get_csd(&msdc_ctl);
+                break;
+            case MSDC_GET_EXCSD:
+                msdc_ctl.result = simple_sd_ioctl_get_excsd(&msdc_ctl);
+                break;
+            case MSDC_DRIVING_SETTING:
+                printk("in ioctl to change driving\n");
+                if (1 == msdc_ctl.iswrite){
+                    msdc_ctl.result = simple_sd_ioctl_set_driving(&msdc_ctl);
+                } else {
+                    msdc_ctl.result = simple_sd_ioctl_get_driving(&msdc_ctl);
+                }
+                break;
+            case MSDC_ERASE_PARTITION:
+                msdc_ctl.result = simple_mmc_erase_partition_wrap(&msdc_ctl);
+                break;
+            case MSDC_SD30_MODE_SWITCH:
+                msdc_ctl.result = simple_sd_ioctl_sd30_mode_switch(&msdc_ctl);
+                break;
+            default:
+                printk("simple_sd_ioctl:this opcode value is illegal!!\n");
+                return -EINVAL;
+        }
+        if (copy_to_user((struct msdc_ioctl*)arg, &msdc_ctl, sizeof(struct msdc_ioctl))) {
+            return -EFAULT;
+        }
+        return msdc_ctl.result;
+    }
 }
 
 static struct file_operations simple_msdc_em_fops = {

@@ -575,9 +575,6 @@ extern void __inner_clean_dcache_L1(void);
 extern void __inner_clean_dcache_L2(void);
 extern void __inner_clean_dcache_all(void);
 
-extern void trace_stop_dormant(void);
-extern void trace_start_dormant(void);
-
 //for save/restore breakpoint and watchpoint
 extern void save_dbg_regs(unsigned int data[]);
 extern void restore_dbg_regs(unsigned int data[]);
@@ -1475,9 +1472,6 @@ static void platform_restore_context(void)
         reg_write(CA7_CACHE_CONFIG, reg_read(CA7_CACHE_CONFIG) & ~(1U << 4));
     }
 
-    trace_stop_dormant();
-    trace_start_dormant();
-    
     dormant_ret_flag[cpu_id] = 1;
 
     power_state[cpu_id] = STATUS_RUN;
