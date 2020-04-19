@@ -42,7 +42,7 @@
 #define PART_FLAG_END              0x2 
 #define PART_MAGIC              0x58881688 
 
-#define PART_SIZE_PRELOADER			(12582*KB)
+#define PART_SIZE_PRELOADER			(12288*KB)
 #define PART_SIZE_MBR			(512*KB)
 #define PART_SIZE_EBR1			(512*KB)
 #define PART_SIZE_PMT			(4096*KB)
@@ -56,7 +56,7 @@
 #define PART_SIZE_BOOTIMG			(6144*KB)
 #define PART_SIZE_RECOVERY			(6144*KB)
 #define PART_SIZE_SEC_RO			(6144*KB)
-#define PART_OFFSET_SEC_RO			(0x2DA0000)
+#define PART_OFFSET_SEC_RO			(0x39A0000)
 #define PART_SIZE_MISC			(512*KB)
 #define PART_SIZE_LOGO			(3072*KB)
 #define PART_SIZE_EXPDB			(10240*KB)
@@ -72,7 +72,7 @@
 
 #define PART_MAX_COUNT			 40
 
-#define MBR_START_ADDRESS_BYTE			(12582*KB)
+#define MBR_START_ADDRESS_BYTE			(12288*KB)
 
 #define WRITE_SIZE_Byte		512
 typedef enum  {
