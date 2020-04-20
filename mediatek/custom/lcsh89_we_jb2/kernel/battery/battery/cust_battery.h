@@ -84,7 +84,7 @@ VBAT_TO_PERCENT Batt_VoltToPercent_Table[] = {
 //#define TBAT_OVER_CRITICAL_LOW     483954
 #define TBAT_OVER_CRITICAL_LOW     67790
 #define BAT_TEMP_PROTECT_ENABLE    1
-#define BAT_NTC_10 0
+#define BAT_NTC_10 1
 #define BAT_NTC_47 0
 #define BAT_NTC_CG103JF103F
 
