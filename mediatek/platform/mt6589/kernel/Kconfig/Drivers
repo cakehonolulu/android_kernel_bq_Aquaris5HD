@@ -237,7 +237,7 @@ config MTK_SPI
 
 # CMMB
 config  MTK_CMMB
-        #tristate "MediaTek CMMB Driver"
+        tristate "MediaTek CMMB Driver"
         depends on  MTK_SPI
         default m
         ---help---
