@@ -59,7 +59,7 @@ while test -n "$1"; do
     shift
 done
 
-source mediatek/build/shell.sh ./ kernel
+source mediatek/build/shell.sh . kernel
 defcfg="${MTK_ROOT_GEN_CONFIG}/kconfig"
 if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
   makeflags+=" O=$outdir"
@@ -110,20 +110,20 @@ if [ "$CUSTOM_DRAM_SIZE" == "3G" ]; then
     # Config DRAM size as 3G (0x18000000).
     sed --in-place=.orig \
         -e 's/\(CONFIG_MAX_DRAM_SIZE_SUPPORT=\).*/\10x18000000/' \
-        out/.config
+        .config
 else
   if [ "$CUSTOM_DRAM_SIZE" == "2G" ]; then
       # Config DRAM size as 2G (0x10000000).
       sed --in-place=.orig \
           -e 's/\(CONFIG_MAX_DRAM_SIZE_SUPPORT=\).*/\10x10000000/' \
           -e 's/\(CONFIG_RESERVED_MEM_SIZE_FOR_PMEM=\).*/\10x1700000/' \
-          out/.config
+          .config
   else
     if [ "$CUSTOM_DRAM_SIZE" == "4G" ]; then
         # Config DRAM size as 4G (0x20000000).
         sed --in-place=.orig \
             -e 's/\(CONFIG_MAX_DRAM_SIZE_SUPPORT=\).*/\10x20000000/' \
-            out/.config
+            .config
     else
       if [ "$CUSTOM_DRAM_SIZE" == "6G" ]; then
           # Config DRAM size as 6G (0x30000000).
@@ -133,7 +133,7 @@ else
               -e 's/.*\(CONFIG_HIGHMEM\).*/\1=y/' \
               -e '$ a\# CONFIG_HIGHPTE is not set' \
               -e '$ a\# CONFIG_DEBUG_HIGHMEM is not set' \
-              out/.config
+              .config
       else
         if [ "$CUSTOM_DRAM_SIZE" == "8G" ]; then
             # Config DRAM size as 8G (0x40000000).
@@ -143,7 +143,7 @@ else
                 -e 's/.*\(CONFIG_HIGHMEM\).*/\1=y/' \
                 -e '$ a\# CONFIG_HIGHPTE is not set' \
                 -e '$ a\# CONFIG_DEBUG_HIGHMEM is not set' \
-                out/.config
+                .config
         fi
       fi
     fi
