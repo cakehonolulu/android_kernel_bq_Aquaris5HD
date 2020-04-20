@@ -10,10 +10,12 @@ makedefs="V=0"
 makefilejobs=$(grep -c "processor" /proc/cpuinfo)
 makejobs=-j$makefilejobs
 curdir=`pwd`
-if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ];then
-  outdir=$curdir/out
-  mkdir -p $outdir
-fi
+
+# cakehonolulu: Disable out/ building style
+#if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ];then
+#  outdir=$curdir/out
+#  mkdir -p $outdir
+#fi
 
 usage() {
     echo "Usage: $0 {release|rebuild|clean|silent|verbose|single} [config-xxx]"
@@ -62,9 +64,10 @@ done
 
 source mediatek/build/shell.sh . kernel
 defcfg="${MTK_ROOT_GEN_CONFIG}/kconfig"
-if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-  makeflags+=" O=$outdir"
-fi
+# cakehonolulu: Disable out/ building style
+#if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#  makeflags+=" O=$outdir"
+#fi
 
 if [ ! -z $KMOD_PATH ]; then
   if [ ! -e $KMOD_PATH ]; then
@@ -78,11 +81,12 @@ fi
 if [ "${clean}" == "y" ]; then
    if [ ! -z $KMOD_PATH ]; then
       echo "Clean kernel module PROJECT=$MTK_PROJECT PATH=$KMOD_PATH";
-      if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-        make M="$KMOD_PATH" O=$outdir clean
-      else
+       # cakehonolulu: Disable out/ building style
+#      if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#        make M="$KMOD_PATH" O=$outdir clean
+#      else
         make M="$KMOD_PATH" clean
-      fi
+#      fi
       exit $?
    else
       make_clean; exit $?;
@@ -97,11 +101,12 @@ if [ "${rebuild}" == "y" ]; then make_clean; fi
 
 echo "**** Configuring / $defcfg / ****"
 # select correct configuration file
-if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-  make mediatek-configs O=$outdir
-else
+# cakehonolulu: Disable out/ building style
+#if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#  make mediatek-configs O=$outdir
+#else
   make mediatek-configs
-fi
+#fi
 
 # Config DRAM size according to central Project Configuration file setting
 # Todo:
@@ -156,11 +161,12 @@ nice make ${makeflags} ${makedefs} silentoldconfig
 
 if [ ! -z $KMOD_PATH ]; then
   echo "Build kernel module PROJECT=$MTK_PROJECT PATH=$KMOD_PATH";
-  if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-    make M="$KMOD_PATH" O=$outdir modules
-  else
+  # cakehonolulu: Disable out/ building style
+#  if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#    make M="$KMOD_PATH" O=$outdir modules
+#  else
     make M="$KMOD_PATH" modules
-  fi
+ # fi
   exit $?
 fi
 
@@ -173,22 +179,23 @@ if [ $? -ne 0 ]; then exit 1; fi
 echo "**** Successfully built kernel ****"
 
 mkimg="${MTK_ROOT_BUILD}/tools/mkimage"
-if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-  kernel_img="${outdir}/arch/arm/boot/Image"
-  kernel_zimg="${outdir}/arch/arm/boot/zImage"
-else
+# cakehonolulu: Disable out/ building style
+#if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#  kernel_img="${outdir}/arch/arm/boot/Image"
+#  kernel_zimg="${outdir}/arch/arm/boot/zImage"
+#else
 kernel_img="${curdir}/arch/arm/boot/Image"
 kernel_zimg="${curdir}/arch/arm/boot/zImage"
-fi
+#fi
 
 echo "**** Generate download images ****"
 
 if [ ! -x ${mkimg} ]; then chmod a+x ${mkimg}; fi
-
-if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
-  ${mkimg} ${kernel_zimg} KERNEL > out/kernel_${MTK_PROJECT}.bin
-else
+# cakehonolulu: Disable out/ building style
+#if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
+#  ${mkimg} ${kernel_zimg} KERNEL > out/kernel_${MTK_PROJECT}.bin
+#else
   ${mkimg} ${kernel_zimg} KERNEL > kernel_${MTK_PROJECT}.bin
-fi
+#fi
 
 copy_to_legacy_download_flash_folder   kernel_${MTK_PROJECT}.bin rootfs_${MTK_PROJECT}.bin
