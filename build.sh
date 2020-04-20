@@ -7,7 +7,8 @@ rebuild="n"
 clean="n"
 makeflags="-w"
 makedefs="V=0"
-makejobs=${MAKEJOBS}
+makefilejobs=$(grep -c "processor" /proc/cpuinfo)
+makejobs=-j$makefilejobs
 curdir=`pwd`
 if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ];then
   outdir=$curdir/out
@@ -165,7 +166,7 @@ fi
 
 echo "**** Building ****"
 
-make ${makeflags} ${makejobs} ${makedefs} -j4
+make ${makeflags} $makejobs ${makedefs}
 
 if [ $? -ne 0 ]; then exit 1; fi
 
