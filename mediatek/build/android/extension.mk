@@ -2,7 +2,7 @@ force: ;
 $(INSTALLED_BUILD_PROP_TARGET): force
 droid: make-platform
 make-platform: droidcore
-	@mediatek/build/android/make-platform.sh $(PRODUCT_OUT) $(TARGET_PRODUCT)
+	@mediatek/build/android/make-platform.sh $(PRODUCT_OUT) $(TARGET_KERNEL_PRODUCT)
 #	@mediatek/build/tools/mkimage $(PRODUCT_OUT)/ramdisk.img ROOTFS > $(PRODUCT_OUT)/android_rootfs.bin
 #	@mediatek/build/tools/mkimage $(PRODUCT_OUT)/ramdisk-recovery.img RECOVERY > $(PRODUCT_OUT)/android_rootfs_recovery.bin
 #	@mediatek/build/tools/mkimage $(PRODUCT_OUT)/ramdisk-factory.img ROOTFS > $(PRODUCT_OUT)/factory.bin
@@ -73,7 +73,7 @@ $(foreach item,$(artifacts_copy), \
   $(eval ALL_DEFAULT_INSTALLED_MODULES += $(_des)) \
 )
 # switch artifacts
-ifneq (generic,$(TARGET_PRODUCT))
+ifneq (generic,$(TARGET_KERNEL_PRODUCT))
 include $(BUILD_SYSTEM_MTK_EXTENSION)/switch.mk
 $(foreach item,$(SWITCH_DIRECTORY), \
    $(eval _src := $(call word-colon,2,$(item))) \
@@ -82,7 +82,7 @@ $(foreach item,$(SWITCH_DIRECTORY), \
    $(eval _result := $(shell cp -a $(_src) $(_des) > /dev/null 2>&1;echo $$?)) \
    $(eval $(if $(filter 0,$(_result)),,$(error the switch cp has a wrong!))) \
  )
-endif #TARGET_PRODUCT
+endif #TARGET_KERNEL_PRODUCT
 endif
 
 $(ARTIFACT_DIR)/cls:

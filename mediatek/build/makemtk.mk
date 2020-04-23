@@ -121,7 +121,7 @@ endif
 #wschen
 OTA_SCATTER_FILE := mediatek/misc/ota_scatter.txt
 
-export TARGET_PRODUCT=$(PROJECT)
+export TARGET_KERNEL_PRODUCT=$(PROJECT)
 export FLAVOR=$(FLAVOR)
 
 ifneq ($(ACTION), )
@@ -177,9 +177,9 @@ else
 endif
 
 ifneq ($(PROJECT),generic)
-  MAKECMD    +=  TARGET_PRODUCT=$(PROJECT) GEMINI=$(GEMINI) EVB=$(EVB) FLAVOR=$(FLAVOR)
+  MAKECMD    +=  TARGET_KERNEL_PRODUCT=$(PROJECT) GEMINI=$(GEMINI) EVB=$(EVB) FLAVOR=$(FLAVOR)
 else
-  MAKECMD    +=  TARGET_PRODUCT=generic GEMINI=$(GEMINI) EVB=$(EVB) FLAVOR=$(FLAVOR)
+  MAKECMD    +=  TARGET_KERNEL_PRODUCT=generic GEMINI=$(GEMINI) EVB=$(EVB) FLAVOR=$(FLAVOR)
 endif
 
 ifeq ($(BUILD_PRELOADER),yes)
@@ -274,8 +274,8 @@ update-api: $(ALLJAVAOPTFILES)
 banyan_addon: $(ALLJAVAOPTFILES)
 win_sdk: $(ALLJAVAOPTFILES)
 
-ifeq ($(TARGET_PRODUCT),emulator)
-   TARGET_PRODUCT := generic
+ifeq ($(TARGET_KERNEL_PRODUCT),emulator)
+   TARGET_KERNEL_PRODUCT := generic
 endif
 .PHONY: mm
 ifeq ($(HAVE_PREPROCESS_FLOW),true)
@@ -284,7 +284,7 @@ endif
 mm:
 	$(hide) echo $(SHOWTIME) $@ing...
 	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) (source build/envsetup.sh;cd $(MM_PATH);TARGET_PRODUCT=$(TARGET_PRODUCT) FLAVOR=$(FLAVOR) mm $(SNOD) $(DEAL_STDOUT_MM);exit $${PIPESTATUS[0]})  && \
+	$(hide) (source build/envsetup.sh;cd $(MM_PATH);TARGET_KERNEL_PRODUCT=$(TARGET_KERNEL_PRODUCT) FLAVOR=$(FLAVOR) mm $(SNOD) $(DEAL_STDOUT_MM);exit $${PIPESTATUS[0]})  && \
           $(SHOWRSLT) $$? $(LOG)$@.log || \
           $(SHOWRSLT) $$? $(LOG)$@.log
 
@@ -295,7 +295,7 @@ endif
 rel-cust: 
 	$(hide) echo $(SHOWTIME) $@ing...
 	$(hide) echo -e \\t\\t\\t\\b\\b\\b\\bLOG: $(S_LOG)$@.log
-	$(hide) python mediatek/build/tools/customRelease.py $(dump_option) ./ $(RELEASE_DEST) $(TARGET_PRODUCT) $(MTK_RELEASE_PACKAGE).xml $(DEAL_STDOUT_CUSTREL) && \
+	$(hide) python mediatek/build/tools/customRelease.py $(dump_option) ./ $(RELEASE_DEST) $(TARGET_KERNEL_PRODUCT) $(MTK_RELEASE_PACKAGE).xml $(DEAL_STDOUT_CUSTREL) && \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log || \
          $(SHOWRSLT) $${PIPESTATUS[0]} $(LOG)$@.log
 
@@ -580,7 +580,7 @@ ifneq ($(PROJECT), generic)
 endif
 
 gen-relkey: PRIVATE_KEY_GENERATOR := development/tools/make_key
-gen-relkey: PRIVATE_KEY_LOCATION := build/target/product/security/$(TARGET_PRODUCT)
+gen-relkey: PRIVATE_KEY_LOCATION := build/target/product/security/$(TARGET_KERNEL_PRODUCT)
 gen-relkey: PRIVATE_KEY_LIST := releasekey media shared platform
 gen-relkey: PRIVATE_SIGNATURE_SUBJECT := $(strip $(SIGNATURE_SUBJECT))
 gen-relkey:

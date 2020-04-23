@@ -5,7 +5,7 @@ Procedure:
  1. if mediatek makefile extension is not patched into ABS :
     copy mediatek/build/android/patch/* to build/core
  2. build with
-      TARGET_PRODUCT=yusu RELEASE_POLICY=other make
+      TARGET_KERNEL_PRODUCT=yusu RELEASE_POLICY=other make
     then execute 
       python mediatek/build/android/tools/class.py
     (modify it if any policy related to framework is changed!)

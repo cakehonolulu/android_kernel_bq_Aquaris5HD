@@ -18,9 +18,9 @@ ARTIFACT_MODULE :=
 ARTIFACT_TARGET := 
 
 ifneq ($(FLAVOR),)
-ARTIFACT_DIR := vendor/mediatek/$(TARGET_PRODUCT)[$(FLAVOR)]/artifacts
+ARTIFACT_DIR := vendor/mediatek/$(TARGET_KERNEL_PRODUCT)[$(FLAVOR)]/artifacts
 else
-ARTIFACT_DIR := vendor/mediatek/$(TARGET_PRODUCT)/artifacts
+ARTIFACT_DIR := vendor/mediatek/$(TARGET_KERNEL_PRODUCT)/artifacts
 endif
 
 ARTIFACT_TARGET_FILE := $(ARTIFACT_DIR)/target.txt

@@ -1,20 +1,20 @@
 PRODUCT_OUT=$1
-TARGET_PRODUCT=$2
+TARGET_KERNEL_PRODUCT=$2
 
 if [[ ${PRODUCT_OUT} == "" ]]; then 
-  echo "usage: make-platform.sh <PRODUCT_OUT> <TARGET_PRODUCT>"
+  echo "usage: make-platform.sh <PRODUCT_OUT> <TARGET_KERNEL_PRODUCT>"
   exit -1;
 fi
 
 if [[ ! -e ${PRODUCT_OUT}/root || ! -e ${PRODUCT_OUT}/system ]]; then
-  echo "$TARGET_PRODUCT platform is not built"
+  echo "$TARGET_KERNEL_PRODUCT platform is not built"
   exit -1
 fi
 
 PACK_PLATFORM=n
 PACK_RAMDISK=n
 
-if [ "${TARGET_PRODUCT}" == "mt6575_fpga" ]; then 
+if [ "${TARGET_KERNEL_PRODUCT}" == "mt6575_fpga" ]; then 
 	PACK_RAMDISK=y
 	PACK_PLATFORM=y
 fi
