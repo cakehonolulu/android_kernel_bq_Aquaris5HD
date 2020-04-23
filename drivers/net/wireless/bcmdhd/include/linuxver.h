@@ -35,7 +35,7 @@
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 33))
 #include <generated/autoconf.h>
 #else
-#include <linux/autoconf.h>
+#include <generated/autoconf.h>
 #endif
 #endif 
 #include <linux/module.h>
