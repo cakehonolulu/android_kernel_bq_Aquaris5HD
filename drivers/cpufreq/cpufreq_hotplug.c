@@ -711,9 +711,6 @@ static ssize_t store_cpu_num_limit(struct kobject *a, struct attribute *b,
 	return count;
 }
 
-<<<<<<< HEAD
-static ssize_t store_cpu_hotplug_disable(struct kobject *a, struct attribute *b,
-=======
 static ssize_t store_cpu_num_base(struct kobject *a, struct attribute *b,
 				    const char *buf, size_t count)
 {
