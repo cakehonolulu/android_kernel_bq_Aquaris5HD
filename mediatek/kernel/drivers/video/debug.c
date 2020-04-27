@@ -51,6 +51,8 @@ extern void mtkfb_log_enable(int enable);
 extern void disp_log_enable(int enable);
 extern void dbi_log_enable(int enable);
 extern void DSI_Enable_Log(bool enable);
+extern void Glitch_Enable_Log(bool enable);
+extern void Glitch_times(unsigned int times);
 extern void mtkfb_vsync_log_enable(int enable);
 extern void mtkfb_m4u_switch(bool enable);
 extern void mtkfb_m4u_dump(void);
@@ -822,7 +824,24 @@ static void process_dbg_opt(const char *opt)
         }
     }
 
-    else if (0 == strncmp(opt, "mtkfb_vsynclog:", 15))
+	else if (0 == strncmp(opt, "glitchlog:", 10))
+    {
+        if (0 == strncmp(opt + 10, "on", 2)) {
+            Glitch_Enable_Log(true);
+        } else if (0 == strncmp(opt + 10, "off", 3)) {
+            Glitch_Enable_Log(false);
+        } else {
+            goto Error;
+        }
+    }
+	
+	else if(0 == strncmp(opt, "glitch_times:", 13))
+	{
+		char *p = (char *)opt + 13;
+		unsigned int level = (unsigned int) simple_strtoul(p, &p, 10);
+		Glitch_times(level);
+	}
+	else if (0 == strncmp(opt, "mtkfb_vsynclog:", 15))
     {
         if (0 == strncmp(opt + 15, "on", 2)) {
             mtkfb_vsync_log_enable(true);

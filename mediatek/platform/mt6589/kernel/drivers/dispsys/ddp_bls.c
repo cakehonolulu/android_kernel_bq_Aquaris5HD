@@ -200,7 +200,7 @@ static unsigned int brightness_mapping(unsigned int level)
 
     if (mapped_level > gMaxLevel)
         mapped_level = gMaxLevel;
-#endif    
+    #endif   
 	return mapped_level;
 }
 

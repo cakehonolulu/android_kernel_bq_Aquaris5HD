@@ -2,7 +2,7 @@
 #include <linux/mm.h>
 #include <linux/mm_types.h>
 #include <linux/module.h>
-#include <generated/autoconf.h>
+#include <linux/autoconf.h>
 #include <linux/init.h>
 #include <linux/types.h>
 #include <linux/cdev.h>
