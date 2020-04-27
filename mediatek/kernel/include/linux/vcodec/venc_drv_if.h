@@ -1,3 +1,38 @@
+/* Copyright Statement:
+ *
+ * This software/firmware and related documentation ("MediaTek Software") are
+ * protected under relevant copyright laws. The information contained herein
+ * is confidential and proprietary to MediaTek Inc. and/or its licensors.
+ * Without the prior written permission of MediaTek inc. and/or its licensors,
+ * any reproduction, modification, use or disclosure of MediaTek Software,
+ * and information contained herein, in whole or in part, shall be strictly prohibited.
+ */
+/* MediaTek Inc. (C) 2010. All rights reserved.
+ *
+ * BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
+ * THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
+ * RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
+ * AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
+ * NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
+ * SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
+ * SUPPLIED WITH THE MEDIATEK SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
+ * THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. RECEIVER EXPRESSLY ACKNOWLEDGES
+ * THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY THIRD PARTY ALL PROPER LICENSES
+ * CONTAINED IN MEDIATEK SOFTWARE. MEDIATEK SHALL ALSO NOT BE RESPONSIBLE FOR ANY MEDIATEK
+ * SOFTWARE RELEASES MADE TO RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR
+ * STANDARD OR OPEN FORUM. RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND
+ * CUMULATIVE LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
+ * AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
+ * OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER TO
+ * MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
+ *
+ * The following software/firmware and/or related documentation ("MediaTek Software")
+ * have been modified by MediaTek Inc. All revisions are subject to any receiver's
+ * applicable license agreements with MediaTek Inc.
+ */
+
 /** 
  * @file 
  *   venc_drv_if.h
@@ -83,6 +118,9 @@ typedef enum __VENC_DRV_VIDEO_FORMAT_T
     VENC_DRV_VIDEO_FORMAT_WMV9,             ///<: WMV9 video format
     VENC_DRV_VIDEO_FORMAT_VC1,              ///<: VC1 video format
     VENC_DRV_VIDEO_FORMAT_VP8,              ///<: VP8 video format
+#ifdef MTK_VIDEO_HEVC_SUPPORT
+    VENC_DRV_VIDEO_FORMAT_HEVC,             ///<: HEVC video format
+#endif
     VENC_DRV_VIDEO_FORMAT_MAX = 0xFFFFFFFF  ///<: Max VENC_DRV_VIDEO_FORMAT_T value
 } VENC_DRV_VIDEO_FORMAT_T;
 
@@ -99,6 +137,7 @@ typedef enum __VENC_DRV_FRAME_RATE_T
     VENC_DRV_FRAME_RATE_10      = 10,         ///<: 10
     VENC_DRV_FRAME_RATE_15      = 15,         ///<: 15
     VENC_DRV_FRAME_RATE_20      = 20,         ///<: 20
+    VENC_DRV_FRAME_RATE_24      = 24,         ///<: 24
     VENC_DRV_FRAME_RATE_25      = 25,         ///<: 25
     VENC_DRV_FRAME_RATE_29_97   = 2997,       ///<: 29.97
     VENC_DRV_FRAME_RATE_30      = 30,         ///<: 30
@@ -167,6 +206,37 @@ typedef enum __VENC_DRV_H264_VIDEO_PROFILE_T
 	VENC_DRV_H264_VIDEO_PROFILE_MULTIVIEW_HIGH			= (1<<16),      ///<: Multiview High (Corrigendum 1 (2009))
     VENC_DRV_H264_VIDEO_PROFILE_MAX                     = 0xFFFFFFFF    ///<: Max VENC_DRV_H264_VIDEO_PROFILE_T value
 }VENC_DRV_H264_VIDEO_PROFILE_T;
+
+#ifdef MTK_VIDEO_HEVC_SUPPORT
+/**
+ * @par Enumeration
+ *   VENC_DRV_HEVC_VIDEO_PROFILE_T
+ * @par Description
+ *   This is the item used for hevc encoder profile capability
+ */ 
+typedef enum __VENC_DRV_HEVC_VIDEO_PROFILE_T
+{
+    VENC_DRV_HEVC_VIDEO_PROFILE_UNKNOWN					= 0,            ///<: Default value (not used)
+	VENC_DRV_HEVC_VIDEO_PROFILE_BASELINE				= (1<<0),       ///<: Baseline
+	VENC_DRV_HEVC_VIDEO_PROFILE_CONSTRAINED_BASELINE    = (1<<1),       ///<: Constrained Baseline
+	VENC_DRV_HEVC_VIDEO_PROFILE_MAIN					= (1<<2),       ///<: Main
+	VENC_DRV_HEVC_VIDEO_PROFILE_EXTENDED				= (1<<3),       ///<: Extended
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH					= (1<<4),       ///<: High
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH_10				    = (1<<5),       ///<: High 10
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH422				    = (1<<6),       ///<: High 422
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH444				    = (1<<7),       ///<: High 444
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH_10_INTRA			= (1<<8),       ///<: High 10 Intra (Amendment 2)
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH422_INTRA			= (1<<9),       ///<: High 422 Intra (Amendment 2)
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH444_INTRA			= (1<<10),      ///<: High 444 Intra (Amendment 2)
+	VENC_DRV_HEVC_VIDEO_PROFILE_CAVLC444_INTRA			= (1<<11),      ///<: CAVLC 444 Intra (Amendment 2)
+	VENC_DRV_HEVC_VIDEO_PROFILE_HIGH444_PREDICTIVE		= (1<<12),      ///<: High 444 Predictive (Amendment 2)
+	VENC_DRV_HEVC_VIDEO_PROFILE_SCALABLE_BASELINE		= (1<<13),      ///<: Scalable Baseline (Amendment 3)
+	VENC_DRV_HEVC_VIDEO_PROFILE_SCALABLE_HIGH			= (1<<14),      ///<: Scalable High (Amendment 3)
+	VENC_DRV_HEVC_VIDEO_PROFILE_SCALABLE_HIGH_INTRA     = (1<<15),      ///<: Scalable High Intra (Amendment 3)
+	VENC_DRV_HEVC_VIDEO_PROFILE_MULTIVIEW_HIGH			= (1<<16),      ///<: Multiview High (Corrigendum 1 (2009))
+    VENC_DRV_HEVC_VIDEO_PROFILE_MAX                     = 0xFFFFFFFF    ///<: Max VENC_DRV_HEVC_VIDEO_PROFILE_T value
+}VENC_DRV_HEVC_VIDEO_PROFILE_T;
+#endif
 
 /**
  * @par Enumeration
@@ -260,12 +330,13 @@ typedef enum __VENC_DRV_RESOLUTION_T
     VENC_DRV_RESOLUTION_SUPPORT_QVGA,               ///<: QVGA
     VENC_DRV_RESOLUTION_SUPPORT_CIF,                ///<: QCIF
     VENC_DRV_RESOLUTION_SUPPORT_HVGA,               ///<: HVGA: 480x320    
-    VENC_DRV_RESOLUTION_SUPPORT_VGA,               ///<: VGA: 640x480
+    VENC_DRV_RESOLUTION_SUPPORT_VGA,                ///<: VGA: 640x480
     VENC_DRV_RESOLUTION_SUPPORT_480I,               ///<: 480I
     VENC_DRV_RESOLUTION_SUPPORT_480P,               ///<: 480P
     VENC_DRV_RESOLUTION_SUPPORT_576I,               ///<: 576I
     VENC_DRV_RESOLUTION_SUPPORT_576P,               ///<: 480P
-    VENC_DRV_RESOLUTION_SUPPORT_FWVGA,               ///<: FWVGA: 864x480    
+    VENC_DRV_RESOLUTION_SUPPORT_WVGA,               ///<: WVGA: 800x480  
+    VENC_DRV_RESOLUTION_SUPPORT_FWVGA,              ///<: FWVGA: 864x480    
     VENC_DRV_RESOLUTION_SUPPORT_720I,               ///<: 720I
     VENC_DRV_RESOLUTION_SUPPORT_720P,               ///<: 720P
     VENC_DRV_RESOLUTION_SUPPORT_1080I,              ///<: 1080I
@@ -305,6 +376,7 @@ typedef enum __VENC_DRV_SET_TYPE_T
     VENC_DRV_SET_TYPE_WFD_MODE,         ///<: Set Wifi-Display Mode
     VENC_DRV_SET_TYPE_RECORD_SIZE,
     VENC_DRV_SET_TYPE_USE_MCI_BUF,      ///<: Set to use MCI buffer
+    VENC_DRV_SET_TYPE_FIT_YUV,          ///<: For Lenovo special case encode 640x360 and 320x180 (not 640x368)
     VENC_DRV_SET_TYPE_MAX = 0xFFFFFFFF  ///<: Max VENC_DRV_SET_TYPE_T value
 } VENC_DRV_SET_TYPE_T;
 
@@ -325,6 +397,7 @@ typedef enum __VENC_DRV_GET_TYPE_T
     VENC_DRV_GET_TYPE_STATISTIC,     	///<: Get statistic.
     VENC_DRV_GET_TYPE_GET_CPU_LOADING_INFO,       ///< query the cpu loading info from kernel driver
     VENC_DRV_GET_TYPE_GET_YUV_FORMAT, ///<: 
+    VENC_DRV_GET_TYPE_GET_CODEC_TIDS,           ///< query the thread ids from the codec lib
     VENC_DRV_GET_TYPE_MAX = 0xFFFFFFFF  ///<: Max VENC_DRV_GET_TYPE_MAX value
 } VENC_DRV_GET_TYPE_T;
 
