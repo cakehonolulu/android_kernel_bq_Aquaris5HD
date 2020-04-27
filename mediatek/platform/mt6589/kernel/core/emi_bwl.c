@@ -638,7 +638,7 @@ static int __init emi_bwl_mod_init(void)
     mt65xx_reg_sync_writel(0x0f131428, EMI_CONG);
     mt65xx_reg_sync_writel(0x0f131428, EMI_CONH);
         
-    mt65xx_reg_sync_writel(0x0c8f0ccd, EMI_SLCT);
+    mt65xx_reg_sync_writel(0x0c8f6ccd, EMI_SLCT);
     mt65xx_reg_sync_writel(0x00720038, EMI_ARBK);
     mt65xx_reg_sync_writel(0x00720038, EMI_ARBK_2ND);
     mt65xx_reg_sync_writel(0x84462f2f, EMI_ARBJ);

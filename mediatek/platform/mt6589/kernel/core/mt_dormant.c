@@ -1471,7 +1471,7 @@ static void platform_restore_context(void)
         /* enable L2 invalidate when reset */
         reg_write(CA7_CACHE_CONFIG, reg_read(CA7_CACHE_CONFIG) & ~(1U << 4));
     }
-
+    
     dormant_ret_flag[cpu_id] = 1;
 
     power_state[cpu_id] = STATUS_RUN;
