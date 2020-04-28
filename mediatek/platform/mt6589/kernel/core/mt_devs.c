@@ -1459,38 +1459,6 @@ static struct platform_device actuator_dev = {
 	.name		  = "lens_actuator",
 	.id		  = -1,
 };
-
-static struct platform_device actuator_dev0 = {
-	.name		  = "lens_actuator0",
-	.id		  = -1,
-};
-
-static struct platform_device actuator_dev1 = {
-	.name		  = "lens_actuator1",
-	.id		  = -1,
-};
-
-static struct platform_device actuator_dev2 = {
-	.name		  = "lens_actuator2",
-	.id		  = -1,
-};
-
-static struct platform_device actuator_dev3 = {
-	.name		  = "lens_actuator3",
-	.id		  = -1,
-};
-
-static struct platform_device actuator_dev4 = {
-	.name		  = "lens_actuator4",
-	.id		  = -1,
-};
-
-static struct platform_device actuator_dev5 = {
-	.name		  = "lens_actuator5",
-	.id		  = -1,
-};
-
-
 /*=======================================================================*/
 /* MT6575 jogball                                                        */
 /*=======================================================================*/
@@ -1519,32 +1487,6 @@ static struct platform_device mt65xx_leds_device = {
 static struct platform_device mtk_nfc_6605_dev = {
     .name   = "mt6605",
     .id     = -1,
-};
-
-static struct i2c_board_info __initdata i2c_devs_af[]={
-		//{ I2C_BOARD_INFO("kd_camera_hw", 0xfe>>1), },
-//		{ I2C_BOARD_INFO("FM50AF", 0x18), },
-		//{ I2C_BOARD_INFO("dummy_eeprom", 0xA0>>1),},
-		//{ I2C_BOARD_INFO("EEPROM_S24CS64A", 0xAA>>1),},
-		///{ I2C_BOARD_INFO("MATV_I2C", 0x41), },
-//		{ I2C_BOARD_INFO("kd_camera_hw", 0xfe>>1), },// fenggy add
-//		{ I2C_BOARD_INFO("FM50AF", 0x18), }, // fenggy add
-//		{ I2C_BOARD_INFO("OV5647AF", 0x19), },
-//		{ I2C_BOARD_INFO("HI542AF", 0x1a), },
-//		{ I2C_BOARD_INFO("MT9P017AF", 0x1b), },
-//		{ I2C_BOARD_INFO("OV8830AF", 0x1c), },	
-//		{ I2C_BOARD_INFO("OV5650AF", 0x1d), },	
-		{ I2C_BOARD_INFO("OV8825AF", 0x18), },	
-		{ I2C_BOARD_INFO("OV12830AF", 0x19), },	
-		{ I2C_BOARD_INFO("OV5647AF", 0x1A), },	
-		{ I2C_BOARD_INFO("S5K3H2YXAF", 0x1B), },
-		{ I2C_BOARD_INFO("A5142AF", 0x1C), },
-		{ I2C_BOARD_INFO("AR0833AF", 0x1D), },
-		{ I2C_BOARD_INFO("IMX111AF", 0x1E), },
-
-//		{ I2C_BOARD_INFO("dummy_eeprom", 0xA0>>1),},
-//		{ I2C_BOARD_INFO("EEPROM_S24CS64A", 0xAA>>1),},
-//		{ I2C_BOARD_INFO("MATV_I2C", 0x41), },	
 };
 
 /*=======================================================================*/
@@ -1642,7 +1584,7 @@ __init int mt6589_board_init(void)
 
 #if defined(CONFIG_MTK_I2C)
 	//i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
-	i2c_register_board_info(1, i2c_devs_af, ARRAY_SIZE(i2c_devs_af));
+	//i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 	//i2c_register_board_info(2, i2c_devs2, ARRAY_SIZE(i2c_devs2));
 		for (i = 0; i < ARRAY_SIZE(mt_device_i2c); i++){
 			retval = platform_device_register(&mt_device_i2c[i]);
@@ -2028,37 +1970,6 @@ retval = platform_device_register(&dummychar_device);
     if (retval != 0){
         return retval;
     }
-
-    retval = platform_device_register(&actuator_dev0);
-    if (retval != 0){
-        return retval;
-    }
-	
-    retval = platform_device_register(&actuator_dev1);
-    if (retval != 0){
-        return retval;
-    }	
-
-    retval = platform_device_register(&actuator_dev2);
-    if (retval != 0){
-        return retval;
-    }
-
-	retval = platform_device_register(&actuator_dev3);
-	if (retval != 0){
-		return retval;
-	}
-
-	retval = platform_device_register(&actuator_dev4);
-	if (retval != 0){
-		return retval;
-	}
-
-	retval = platform_device_register(&actuator_dev5);
-	if (retval != 0){
-		return retval;
-	}
-	
 #endif
 //
 //=======================================================================

@@ -152,7 +152,7 @@ extern int pmic_get_gpu_status_bit_info(void);
 enum hrtimer_restart mt_gpufreq_timer_func(struct hrtimer *timer);
 static int mt_gpufreq_thread_handler(void *unused);
 static void mt_gpufreq_set(unsigned int freq_old, unsigned int freq_new, unsigned int volt_old, unsigned int volt_new);
-	
+    
 
 /****************************************************************************
 * Initialize that keep GPU frequency in non OD for some MM scenario bandwidth
@@ -160,7 +160,7 @@ static void mt_gpufreq_set(unsigned int freq_old, unsigned int freq_new, unsigne
 void mt_gpufreq_keep_frequency_non_OD_init(unsigned int freq_limit, unsigned int volt_limit)
 {
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_keep_frequency_non_OD_init, freq_limit = %d, volt_limit = %d\n", freq_limit, volt_limit);
-	
+    
     if ((freq_limit == GPU_KEEP_FREQ_NON_OD_BYPASS) && (volt_limit == GPU_KEEP_VOLT_NON_OD_BYPASS))
     {
         mt_gpufreq_keep_specific_frequency_activate = false;
@@ -197,7 +197,7 @@ void mt_gpufreq_keep_frequency_non_OD(bool enable)
     {
         mt_gpufreq_keep_specific_frequency = true;
     }
-	
+    
     return;
 }
 EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD);
@@ -208,7 +208,7 @@ EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD);
 bool mt_gpufreq_keep_frequency_non_OD_get(void)
 {
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_keep_frequency_non_OD_get, mt_gpufreq_keep_specific_frequency = %d\n", mt_gpufreq_keep_specific_frequency);
-	
+    
     return mt_gpufreq_keep_specific_frequency;
 }
 EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD_get);
@@ -219,7 +219,7 @@ EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD_get);
 void mt_gpufreq_keep_frequency_non_OD_set(bool enable)
 {
     unsigned long flags;
-	
+    
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_keep_frequency_non_OD_set, enable = %d\n", enable);
 
     /* If DVFS not enable, set freq and volt directly by mt_gpufreq_set(). */
@@ -233,7 +233,7 @@ void mt_gpufreq_keep_frequency_non_OD_set(bool enable)
         mt_gpufreq_set(g_freq_new_init_keep, mt_gpufreq_fixed_frequency, g_volt_new_init_keep, mt_gpufreq_fixed_voltage);
     }
     spin_unlock_irqrestore(&mt_gpufreq_lock, flags);
-	
+    
     return;
 }
 EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD_set);
@@ -244,7 +244,7 @@ EXPORT_SYMBOL(mt_gpufreq_keep_frequency_non_OD_set);
 static void mt_gpufreq_check_freq_and_set_pll(void)
 {
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_check_freq_and_set_pll, g_cur_freq = %d\n", g_cur_freq);
-	
+    
     switch (g_cur_freq)
     {
         case GPU_MMPLL_D3: // 476Mhz
@@ -256,7 +256,7 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
             }
             #endif
             break;
-			
+            
         case GPU_SYSPLL_D2: // 403Mhz
             if(mt_gpufreq_enable_mainpll == 0)
             {
@@ -264,7 +264,7 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
                 mt_gpufreq_enable_mainpll = 1;
             }
             break;
-			
+            
         case GPU_MMPLL_D4: // 357Mhz
             #ifdef GPU_CONTROL_MM_PLL
             if(mt_gpufreq_enable_mmpll == 0)
@@ -274,10 +274,10 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
             }
             #endif
             break;
-			
+            
         case GPU_UNIVPLL1_D2: // 312Mhz
             break;
-			
+            
         case GPU_MMPLL_D5: // 286Mhz
             #ifdef GPU_CONTROL_MM_PLL
             if(mt_gpufreq_enable_mmpll == 0)
@@ -287,7 +287,7 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
             }
             #endif
             break;
-			
+            
         case GPU_SYSPLL_D3: // 268Mhz
             if(mt_gpufreq_enable_mainpll == 0)
             {
@@ -295,7 +295,7 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
                 mt_gpufreq_enable_mainpll = 1;
             }
             break;
-			
+            
         case GPU_MMPLL_D6: // 238Mhz
             #ifdef GPU_CONTROL_MM_PLL
             if(mt_gpufreq_enable_mmpll == 0)
@@ -305,10 +305,10 @@ static void mt_gpufreq_check_freq_and_set_pll(void)
             }
             #endif
             break;
-			
+            
         case GPU_UNIVPLL1_D4: // 156Mhz
             break;
-			
+            
         default:
             break;
     }
@@ -348,10 +348,10 @@ static void mt_gpufreq_period_time_reset(void)
     do_gettimeofday(&t1);
 
     mt_gpufreq_prev_wall_time = (unsigned int)t1.tv_usec;
-	mt_gpu_clock_total_on_time = 0;
-	mt_gpufreq_period_time = 0;
+    mt_gpu_clock_total_on_time = 0;
+    mt_gpufreq_period_time = 0;
 
-	xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_period_time_reset(), mt_gpufreq_prev_wall_time = %d\n", mt_gpufreq_prev_wall_time);
+    xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_period_time_reset(), mt_gpufreq_prev_wall_time = %d\n", mt_gpufreq_prev_wall_time);
 }
 
 /*****************************************************************
@@ -360,13 +360,13 @@ static void mt_gpufreq_period_time_reset(void)
 unsigned int mt_gpufreq_gpu_clock_ratio(enum mt_gpufreq_clock_ratio act)
 {
     unsigned long flags;
-	unsigned int load = 0;
-	struct timeval t2;
-	
+    unsigned int load = 0;
+    struct timeval t2;
+    
     spin_lock_irqsave(&mt_gpufreq_lock, flags);
 
     do_gettimeofday(&t2);
-	
+    
     if(act == GPU_DVFS_CLOCK_RATIO_ON && mt_gpufreq_clock_on == 0)
     {
         /* Remember clock on starting time. */
@@ -400,10 +400,10 @@ unsigned int mt_gpufreq_gpu_clock_ratio(enum mt_gpufreq_clock_ratio act)
                 mt_gpu_clock_total_on_time += (mt_gpufreq_cur_wall_time - mt_gpu_clock_on_time_start);
             else
                 mt_gpu_clock_total_on_time += ((GPU_COUNT_OVERFLOW - mt_gpu_clock_on_time_start) + mt_gpufreq_cur_wall_time);
-			
+            
             /* Use current time as next clock on starting time */
             mt_gpu_clock_on_time_start = mt_gpufreq_cur_wall_time;
-			dprintk("GET, clock is still ON!\n");
+            dprintk("GET, clock is still ON!\n");
         }
 
         /* Calculate period time. */
@@ -414,17 +414,17 @@ unsigned int mt_gpufreq_gpu_clock_ratio(enum mt_gpufreq_clock_ratio act)
         dprintk("GET 2, mt_gpu_clock_on_time_start = %d, mt_gpu_clock_total_on_time = %d\n", mt_gpu_clock_on_time_start, mt_gpu_clock_total_on_time);
         dprintk("GET 3, mt_gpufreq_prev_wall_time = %d, mt_gpufreq_period_time = %d\n", mt_gpufreq_prev_wall_time, mt_gpufreq_period_time);
         mt_gpufreq_prev_wall_time = mt_gpufreq_cur_wall_time;
-		
+        
         /* Calculate ratio. */
         load = 100 * mt_gpu_clock_total_on_time / mt_gpufreq_period_time;
         mt_gpu_clock_total_on_time = 0;
         mt_gpufreq_period_time = 0;
         dprintk("GET 4, ratio = %d\n", load);
     }
-	
-	spin_unlock_irqrestore(&mt_gpufreq_lock, flags);
+    
+    spin_unlock_irqrestore(&mt_gpufreq_lock, flags);
 
-	return load;
+    return load;
 }
 EXPORT_SYMBOL(mt_gpufreq_gpu_clock_ratio);
 #endif
@@ -528,7 +528,7 @@ static int mt_setup_gpufreqs_table(struct mt_gpufreq_info *freqs, int num)
     g_limited_min_id = mt_gpufreqs_num - 1;
 
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_setup_gpufreqs_table, g_cur_freq = %d, g_cur_volt = %d\n", g_cur_freq, g_cur_volt);
-	
+    
     mt_setup_gpufreqs_power_table(num);
 
     return 0;
@@ -599,12 +599,12 @@ static void mt_gpu_clock_switch(unsigned int sel)
     #ifdef GPU_HYD_CLK_SWITCH_ENABLED
     unsigned int clk_cfg_4 = 0;
     #endif
-	
+    
     clk_cfg_0 = DRV_Reg32(CLK_CFG_0);
     #ifdef GPU_HYD_CLK_SWITCH_ENABLED
     clk_cfg_4 = DRV_Reg32(CLK_CFG_4);
     #endif
-	
+    
     switch (sel)
     {
         case GPU_MMPLL_D3: // 476Mhz
@@ -615,7 +615,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x5 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_MMPLL_D3\n");
@@ -626,7 +626,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D3\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL			
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL         
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -640,7 +640,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
             }
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x2 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_SYSPLL_D2\n");
@@ -651,7 +651,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_SYSPLL_D2\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL				
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL             
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -667,7 +667,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x6 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_MMPLL_D4\n");
@@ -678,7 +678,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D4\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -697,13 +697,13 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_UNIVPLL1_D2\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 0;
             }
-			
+            
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -719,7 +719,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x7 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_MMPLL_D5\n");
@@ -730,7 +730,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D5\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -744,7 +744,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
             }
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x3 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_SYSPLL_D3\n");
@@ -755,7 +755,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D5\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -771,7 +771,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x1 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch: switch MFG clock to GPU_MMPLL_D6\n");
@@ -782,7 +782,7 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D5\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -801,13 +801,13 @@ static void mt_gpu_clock_switch(unsigned int sel)
             dprintk("mt_gpu_clock_switch: switch HYD clock to GPU_MMPLL_D5\n");
             #endif
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 0;
             }
-			
+            
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -840,7 +840,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x5 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_MMPLL_D3\n");
@@ -849,7 +849,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D3\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -863,7 +863,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
             }
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x2 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_SYSPLL_D2\n");
@@ -872,7 +872,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_SYSPLL_D2\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -888,7 +888,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x6 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_MMPLL_D4\n");
@@ -897,7 +897,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D4\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -909,18 +909,18 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x4 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_UNIVPLL1_D2\n");
-			
+            
             clk_cfg_4 = (clk_cfg_4 & 0xFFFFFFF8) | (0x4);
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_UNIVPLL1_D2\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 0;
             }
-			
+            
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -936,7 +936,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x7 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_MMPLL_D5\n");
@@ -945,7 +945,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D5\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -959,7 +959,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
             }
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x3 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_SYSPLL_D3\n");
@@ -968,7 +968,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D5\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -984,7 +984,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
                 mt_gpufreq_enable_mmpll = 1;
             }
             #endif
-			
+            
             clk_cfg_0 = (clk_cfg_0 & 0xFFF8FFFF) | (0x1 << 16);
             mt65xx_reg_sync_writel(clk_cfg_0, CLK_CFG_0);
             dprintk("mt_gpu_clock_switch_initial: switch MFG clock to GPU_MMPLL_D6\n");
@@ -993,7 +993,7 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D5\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
@@ -1010,13 +1010,13 @@ static void mt_gpu_clock_switch_initial(unsigned int sel)
             mt65xx_reg_sync_writel(clk_cfg_4, CLK_CFG_4);
             dprintk("mt_gpu_clock_switch_initial: switch HYD clock to GPU_MMPLL_D5\n");
 
-            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL	
+            #ifdef GPU_CALL_DISABLE_MAIN_MM_PLL 
             if(mt_gpufreq_enable_mainpll == 1)
             {
                 disable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 0;
             }
-			
+            
             if(mt_gpufreq_enable_mmpll == 1)
             {
                 disable_pll(MMPLL, "GPU_DVFS");
@@ -1141,15 +1141,15 @@ void mt_gpufreq_set_initial(unsigned int freq_new, unsigned int volt_new)
 
     g_set_freq_write = freq_new;
     g_set_volt_write = volt_new;
-	
+    
     mt_gpufreq_check_freq_and_set_pll();
-		
+        
     if(freq_new == g_cur_freq)
     {
         g_volt_set_init_step_1 = 1;
         return;
     }
-	
+    
     if (freq_new > g_cur_freq)
     {
         #ifdef MT_BUCK_ADJUST
@@ -1311,7 +1311,7 @@ static int mt_gpufreq_target(int idx)
         target_volt = mt_gpufreqs[g_gpufreq_max_id].gpufreq_volt;
         dprintk("Need to raise frequency, raise to MAX frequency %d !\n", target_freq);
     }
-	
+    
     if (target_freq > mt_gpufreqs[g_limited_max_id].gpufreq_khz)
     {
         /*********************************************
@@ -1319,7 +1319,7 @@ static int mt_gpufreq_target(int idx)
         **********************************************/
         target_freq = mt_gpufreqs[g_limited_max_id].gpufreq_khz;
         target_volt = mt_gpufreqs[g_limited_max_id].gpufreq_volt;
-		dprintk("Limit! Target freq %d > Thermal limit frequency %d\n", target_freq, mt_gpufreqs[g_limited_max_id].gpufreq_khz);
+        dprintk("Limit! Target freq %d > Thermal limit frequency %d\n", target_freq, mt_gpufreqs[g_limited_max_id].gpufreq_khz);
     }
 
     /************************************************
@@ -1331,7 +1331,7 @@ static int mt_gpufreq_target(int idx)
         target_volt = mt_gpufreq_fixed_voltage;
         dprintk("Fixed! fixed frequency %d, fixed voltage %d\n", target_freq, target_volt);
     }
-	
+    
     /************************************************
     * target frequency == current frequency, skip it
     *************************************************/
@@ -1466,7 +1466,7 @@ static ssize_t mt_gpufreq_state_write(struct file *file, const char *buffer, uns
     if((mt_gpufreq_registered == false) && (mt_gpufreq_registered_statewrite == false))
     {
         mt_gpufreq_pause = true;
-		
+        
         mt_gpufreqs = kzalloc((1) * sizeof(struct mt_gpufreq_info), GFP_KERNEL);
         mt_gpufreqs[0].gpufreq_khz = g_cur_freq;
         mt_gpufreqs[0].gpufreq_lower_bound = 0;
@@ -1478,7 +1478,7 @@ static ssize_t mt_gpufreq_state_write(struct file *file, const char *buffer, uns
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_upper_bound = %u\n", mt_gpufreqs[0].gpufreq_upper_bound);
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_volt = %u\n", mt_gpufreqs[0].gpufreq_volt);
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_remap = %u\n", mt_gpufreqs[0].gpufreq_remap);
-	
+    
         mt_gpufreq_timer.function = mt_gpufreq_timer_func;
         mt_gpufreq_thread = kthread_run(mt_gpufreq_thread_handler, 0, "mt_gpufreq");
         if (IS_ERR(mt_gpufreq_thread))
@@ -1487,7 +1487,7 @@ static ssize_t mt_gpufreq_state_write(struct file *file, const char *buffer, uns
         }
         mt_gpufreq_registered_statewrite = true;
     }
-	
+    
     if (sscanf(buffer, "%d", &enabled) == 1)
     {
         if (enabled == 1)
@@ -1526,7 +1526,7 @@ static ssize_t mt_gpufreq_loading_state_write(struct file *file, const char *buf
     /* If 3D registered OD table, no need to activate. */
     if(mt_gpufreq_registered == true) 
         return count;
-	
+    
     /* Init timer and create kthread. */
     if(mt_gpufreq_registered_loading_state_write == false)
     {
@@ -1541,7 +1541,7 @@ static ssize_t mt_gpufreq_loading_state_write(struct file *file, const char *buf
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_upper_bound = %u\n", mt_gpufreqs[0].gpufreq_upper_bound);
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_volt = %u\n", mt_gpufreqs[0].gpufreq_volt);
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "freqs[0].gpufreq_remap = %u\n", mt_gpufreqs[0].gpufreq_remap);
-	
+    
         mt_gpufreq_timer.function = mt_gpufreq_timer_func;
         mt_gpufreq_thread = kthread_run(mt_gpufreq_thread_handler, 0, "mt_gpufreq");
         if (IS_ERR(mt_gpufreq_thread))
@@ -1550,7 +1550,7 @@ static ssize_t mt_gpufreq_loading_state_write(struct file *file, const char *buf
         }
         mt_gpufreq_registered_loading_state_write = true;
     }
-	
+    
     if (sscanf(buffer, "%d", &enabled) == 1)
     {
         if (enabled == 1)
@@ -1781,7 +1781,7 @@ static ssize_t mt_gpufreq_fixed_frequency_write(struct file *file, const char *b
     {
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "bad argument!! should be [enable fixed_freq fixed_volt]\n");
     }
-	
+    
     return -EINVAL;
 }
 
@@ -1792,7 +1792,7 @@ static ssize_t mt_gpufreq_set_frequency_write(struct file *file, const char *buf
 {
     int set_freq = 0;
     unsigned long flags;
-	
+    
     if (sscanf(buffer, "%d", &set_freq) == 1)
     {
         spin_lock_irqsave(&mt_gpufreq_lock, flags);
@@ -1805,7 +1805,7 @@ static ssize_t mt_gpufreq_set_frequency_write(struct file *file, const char *buf
     {
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "bad argument!! should be [enable fixed_freq fixed_volt]\n");
     }
-	
+    
     return -EINVAL;
 }
 
@@ -1816,7 +1816,7 @@ static ssize_t mt_gpufreq_set_voltage_write(struct file *file, const char *buffe
 {
     int set_volt = 0;
     unsigned long flags;
-	
+    
     if (sscanf(buffer, "%d", &set_volt) == 1)
     {
         spin_lock_irqsave(&mt_gpufreq_lock, flags);
@@ -1829,7 +1829,7 @@ static ssize_t mt_gpufreq_set_voltage_write(struct file *file, const char *buffe
     {
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "bad argument!! should be [enable fixed_freq fixed_volt]\n");
     }
-	
+    
     return -EINVAL;
 }
 
@@ -1840,7 +1840,7 @@ static int mt_gpufreq_var_dump(char *buf, char **start, off_t off, int count, in
 {
     int len = 0;
     char *p = buf;
-	
+    
     unsigned int clk_cfg_0 = 0;
     unsigned int clk_cfg_4 = 0;
     clk_cfg_0 = DRV_Reg32(CLK_CFG_0);
@@ -1852,7 +1852,7 @@ static int mt_gpufreq_var_dump(char *buf, char **start, off_t off, int count, in
     p += sprintf(p, "pmic_get_gpu_status_bit_info() = %d\n", pmic_get_gpu_status_bit_info());
     p += sprintf(p, "mt_gpufreq_enable_mainpll = %d\n", mt_gpufreq_enable_mainpll);
     p += sprintf(p, "mt_gpufreq_enable_mmpll = %d\n", mt_gpufreq_enable_mmpll);
-	
+    
     p += sprintf(p, "g_cur_freq_init_keep = %d\n", g_cur_freq_init_keep);
     p += sprintf(p, "g_volt_set_init_step_1 = %d, g_volt_set_init_step_2 = %d, g_volt_set_init_step_3 = %d\n", g_volt_set_init_step_1, g_volt_set_init_step_2, g_volt_set_init_step_3);
     p += sprintf(p, "g_freq_new_init_keep = %d, g_volt_new_init_keep = %d\n", g_freq_new_init_keep, g_volt_new_init_keep);
@@ -1862,7 +1862,7 @@ static int mt_gpufreq_var_dump(char *buf, char **start, off_t off, int count, in
     p += sprintf(p, "mt_gpufreq_fixed_frequency = %d, mt_gpufreq_fixed_voltage = %d\n", mt_gpufreq_fixed_frequency, mt_gpufreq_fixed_voltage);
     p += sprintf(p, "MM mt_gpufreq_keep_specific_frequency = %d\n", mt_gpufreq_keep_specific_frequency);
     p += sprintf(p, "g_cur_volt = %d\n", g_cur_volt);
-		
+        
     len = p - buf;
     return len;
 }
@@ -1878,8 +1878,8 @@ static ssize_t mt_gpufreq_clock_on_ratio_write(struct file *file, const char *bu
     if (sscanf(buffer, "%u", &delay) == 1)
     {
         mt_gpufreq_gpu_clock_ratio(GPU_DVFS_CLOCK_RATIO_ON);
-		mdelay(delay);
-		mt_gpufreq_gpu_clock_ratio(GPU_DVFS_CLOCK_RATIO_OFF);
+        mdelay(delay);
+        mt_gpufreq_gpu_clock_ratio(GPU_DVFS_CLOCK_RATIO_OFF);
 
         return count;
     }
@@ -1940,7 +1940,7 @@ int mt_gpufreq_register(struct mt_gpufreq_info *freqs, int num)
         ktime_t ktime = ktime_set(mt_gpufreq_sample_s, mt_gpufreq_sample_ns);
     
         mt_gpufreq_registered = true;
-    	
+        
         #ifdef CONFIG_HAS_EARLYSUSPEND
         mt_gpufreq_early_suspend_handler.suspend = mt_gpufreq_early_suspend;
         mt_gpufreq_early_suspend_handler.resume = mt_gpufreq_late_resume;
@@ -1969,7 +1969,7 @@ int mt_gpufreq_register(struct mt_gpufreq_info *freqs, int num)
         #ifdef GPU_DVFS_DEFAULT_DISABLED
         mt_gpufreq_state_set(0);
         #endif
-	
+    
         if(mt_gpufreq_pause == false)
         {
             hrtimer_start(&mt_gpufreq_timer, ktime, HRTIMER_MODE_REL);
@@ -2000,10 +2000,10 @@ int mt_gpufreq_non_register(void)
         mt_gpufreq_early_suspend_handler.resume = mt_gpufreq_late_resume;
         register_early_suspend(&mt_gpufreq_early_suspend_handler);
         #endif
-		
+        
         mt_gpufreq_already_non_registered = true;
         mt_setup_gpufreqs_default_power_table(1);
-		
+        
         hrtimer_init(&mt_gpufreq_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
         mt_gpufreq_state_set(0);
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_non_register() done\n");
@@ -2026,7 +2026,7 @@ static int __init mt_gpufreq_init(void)
     unsigned int clk_cfg_0 = 0;
 
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_init\n");
-		
+        
     mt_gpufreq_dir = proc_mkdir("gpufreq", NULL);
     if (!mt_gpufreq_dir)
     {
@@ -2067,7 +2067,7 @@ static int __init mt_gpufreq_init(void)
         {
             mt_entry->read_proc = mt_gpufreq_opp_dump_read;
         }
-	
+    
         #ifdef GPU_CLOCK_RATIO
         mt_entry = create_proc_entry("gpufreq_clock_on", S_IRUGO | S_IWUSR | S_IWGRP, mt_gpufreq_dir);
         if (mt_entry)
@@ -2107,12 +2107,12 @@ static int __init mt_gpufreq_init(void)
                 mt_entry->write_proc = mt_gpufreq_set_voltage_write;
         }
     }
-	
+    
     clk_cfg_0 = DRV_Reg32(CLK_CFG_0);
     clk_cfg_0 = (clk_cfg_0 & 0x00070000) >> 16;
 
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_init, clk_cfg_0 = %d\n", clk_cfg_0);
-	
+    
     switch (clk_cfg_0)
     {
         case 0x5: // 476Mhz
@@ -2154,10 +2154,10 @@ static void __exit mt_gpufreq_exit(void)
 
 }
 
-static int mt_gpufreq_suspend(struct platform_device *dev, pm_message_t state)	
+static int mt_gpufreq_suspend(struct platform_device *dev, pm_message_t state)  
 {
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_suspend, g_cur_freq = %d\n", g_cur_freq);
-	
+    
     if(mt_gpufreq_enable_mainpll == 1)
     {
         disable_pll(MAINPLL, "GPU_DVFS");
@@ -2173,14 +2173,14 @@ static int mt_gpufreq_suspend(struct platform_device *dev, pm_message_t state)
         xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_suspend, disable_pll(MMPLL) ===\n");
     }
     #endif
-	
-	return 0;
+    
+    return 0;
 }
 
 static int mt_gpufreq_resume(struct platform_device *dev)
 {
     xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "mt_gpufreq_resume, g_cur_freq = %d\n", g_cur_freq);
-	
+    
     switch (g_cur_freq)
     {
         case GPU_MMPLL_D3: // 476Mhz
@@ -2190,13 +2190,13 @@ static int mt_gpufreq_resume(struct platform_device *dev)
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MMPLL) 476M ===\n");
                 #endif
             break;
-			
+            
         case GPU_SYSPLL_D2: // 403Mhz
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MAINPLL) 403M ===\n");
             break;
-			
+            
         case GPU_MMPLL_D4: // 357Mhz
                 #ifdef GPU_CONTROL_MM_PLL
                 enable_pll(MMPLL, "GPU_DVFS");
@@ -2204,10 +2204,10 @@ static int mt_gpufreq_resume(struct platform_device *dev)
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MMPLL) 357M ===\n");
                 #endif
             break;
-			
+            
         case GPU_UNIVPLL1_D2: // 312Mhz
             break;
-			
+            
         case GPU_MMPLL_D5: // 286Mhz
                 #ifdef GPU_CONTROL_MM_PLL
                 enable_pll(MMPLL, "GPU_DVFS");
@@ -2215,13 +2215,13 @@ static int mt_gpufreq_resume(struct platform_device *dev)
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MMPLL) 286M ===\n");
                 #endif
             break;
-			
+            
         case GPU_SYSPLL_D3: // 268Mhz
                 enable_pll(MAINPLL, "GPU_DVFS");
                 mt_gpufreq_enable_mainpll = 1;
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MAINPLL) 268M ===\n");
             break;
-			
+            
         case GPU_MMPLL_D6: // 238Mhz
                 #ifdef GPU_CONTROL_MM_PLL
                 enable_pll(MMPLL, "GPU_DVFS");
@@ -2229,47 +2229,47 @@ static int mt_gpufreq_resume(struct platform_device *dev)
                 xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, enable_pll(MMPLL) 238M ===\n");
                 #endif
             break;
-			
+            
         case GPU_UNIVPLL1_D4: // 156Mhz
             break;
-			
+            
         default:
             xlog_printk(ANDROID_LOG_INFO, "Power/GPU_DVFS", "=== mt_gpufreq_resume, NOT support this frequency! ===\n");
             break;
     }
 
-	
-	return 0;
+    
+    return 0;
 }
 
 static struct platform_driver mt_gpufreq_pdrv = {
-	.remove     = NULL,
-	.shutdown   = NULL,
-	.probe      = NULL,
-	.suspend	= mt_gpufreq_suspend,
-	.resume		= mt_gpufreq_resume,
-	.driver     = {
-		.name = GPUFREQ_NAME,
+    .remove     = NULL,
+    .shutdown   = NULL,
+    .probe      = NULL,
+    .suspend    = mt_gpufreq_suspend,
+    .resume     = mt_gpufreq_resume,
+    .driver     = {
+        .name = GPUFREQ_NAME,
     },
 };
 
 static struct platform_device mt_gpufreq_pdev = {
-	.name	= GPUFREQ_NAME,
-	.id	= -1,
+    .name   = GPUFREQ_NAME,
+    .id = -1,
 };
 
 static int __init mt_gpufreq_late_init(void)
 {
     int r = 0;
     int err = 0;
-	
+    
     r = platform_device_register(&mt_gpufreq_pdev);
-	if (r)
-		return r;
+    if (r)
+        return r;
 
     err = platform_driver_register(&mt_gpufreq_pdrv);
-	if (err)
-		return err;
+    if (err)
+        return err;
 
     return 0;
 }

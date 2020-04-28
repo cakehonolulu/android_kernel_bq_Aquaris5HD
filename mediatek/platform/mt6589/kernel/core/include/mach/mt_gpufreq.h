@@ -52,17 +52,17 @@
 #define GPU_POWER_VRF18_1_175V  (5)
 #define GPU_POWER_VRF18_1_20V   (6)
 
+/*****************************************
+* Fixed GPU frequency for some MM scenario
+******************************************/
+#define GPU_KEEP_FREQ_NON_OD_BYPASS (0xFFFF)
+#define GPU_KEEP_VOLT_NON_OD_BYPASS (0xFFFE)
 
 /*****************************************
 * PMIC settle time, should not be changed
 ******************************************/
 #define PMIC_SETTLE_TIME (40) // us
 
-/*****************************************
-* Fixed GPU frequency for some MM scenario
-******************************************/
-#define GPU_KEEP_FREQ_NON_OD_BYPASS (0xFFFF)
-#define GPU_KEEP_VOLT_NON_OD_BYPASS (0xFFFE)
 
 /****************************************************************
 * enable this option to calculate clock on ration in period time.
@@ -77,20 +77,6 @@
 *****************************************************************/
 //#define GPU_DVFS_DEFAULT_DISABLED
 
-/****************************************************************
-* Default enable gpu HYD clock switch
-*****************************************************************/
-//#define GPU_HYD_CLK_SWITCH_ENABLED
-
-/****************************************************************
-* Call disable_pll() when clock switch
-*****************************************************************/
-//#define GPU_CALL_DISABLE_MAIN_MM_PLL
-
-/****************************************************************
-* Control MMPLL
-*****************************************************************/
-//#define GPU_CONTROL_MM_PLL
 
 /********************************************
 * enable this option to adjust buck voltage

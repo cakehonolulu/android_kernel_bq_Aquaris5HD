@@ -86,16 +86,16 @@ static unsigned int	*g_fh_rank0_va;
 #define LOW_DRAMC		233 //233.5
 #define LOW_DRAMC_FREQ		233500
 
-#define LVDS_PLL_IS_ON		1
+#define LVDS_PLL_IS_ON		0
 
 //TODO: fill in the default freq & corresponding setting_id
 static  fh_pll_t g_fh_pll[MT658X_FH_PLL_TOTAL_NUM] = { //keep track the status of each PLL 
 	{FH_FH_DISABLE,     FH_PLL_ENABLE   , 0, 0       , 0}, //ARMPLL   default SSC disable
 	{FH_FH_DISABLE,     FH_PLL_ENABLE   , 0, 1612000 , 0}, //MAINPLL  default SSC disable
 	{FH_FH_ENABLE_SSC,  FH_PLL_ENABLE   , 0, 266000  , 0}, //MEMPLL   default SSC enable
-	{FH_FH_DISABLE,     FH_PLL_ENABLE   , 0, 1599000 , 0}, //MSDCPLL  default SSC disable
+	{FH_FH_DISABLE,     FH_PLL_ENABLE   , 0, 1599000 , 0}, //MSDCPLL  default SSC enable
 	{FH_FH_DISABLE,     FH_PLL_ENABLE   , 0, 1188000 , 0}, //TVDPLL   default SSC disable
-	{FH_FH_ENABLE_SSC,  FH_PLL_ENABLE   , 0, 1664000 , 0}  //LVDSPLL  default SSC enable
+	{FH_FH_DISABLE,     FH_PLL_DISABLE  , 0, 1200000 , 0}  //LVDSPLL  default SSC disable
 };
 
 
@@ -147,8 +147,8 @@ static const struct freqhopping_ssc mt_ssc_tvdpll_setting[MT_SSC_NR_PREDEFINE_SE
 static const struct freqhopping_ssc mt_ssc_lvdspll_setting[MT_SSC_NR_PREDEFINE_SETTING]= {
 	{0,0,0,0,0,0},//Means disable
 	{0,0xFF,0xFF,0xFF,0xFF,0xFF},//Means User-Define
-	{1664000, 0, 9, 0, 0x51EB, 0x80000}, // 1664MHz ,32
-	{1400000, 0, 9, 0, 0x8dc8, 0xDD89D}, // 1400MHz ,55.38461538
+	{1200000, 0, 9, 0, 0x9627, 0xB89D8}, // 1200MHz ,46.15384615
+	{1400000, 0, 9, 0, 0x8dc8, 0xDD89D}, // 1400MHz, 55.38461538
 	{0,0,0,0,0,0} //EOF
 };
 
@@ -1703,13 +1703,6 @@ static int freqhopping_dumpregs_proc_read(char *page, char **start, off_t off, i
 		
 	p += sprintf(p, "\r\nCLK26CALI: 0x%08x\r\n",
 			DRV_Reg32(CLK26CALI)); 
-	
-	if(strstr(saved_command_line, "lcm_type=1 ") == NULL){
-		p += sprintf(p, "\r\nlcm_type: NOT MIPI\r\n");
-	}
-	else{
-		p += sprintf(p, "\r\nlcm_type: MIPI\r\n");
-	}
 
 	*start = page + off;
 
@@ -2443,15 +2436,7 @@ void mt_freqhopping_pll_init(void)
 	freqhopping_config(MT658X_FH_MEM_PLL, 266000, true); //Enable MEMPLL SSC
 	
 #if LVDS_PLL_IS_ON
-	if(strstr(saved_command_line, " lcm_type=1 ") != NULL){
-		FH_MSG("lcm_type: MIPI");
-		freqhopping_config(MT658X_FH_LVDS_PLL, 1664000, true); //Enable LVDSPLL SSC
-	}
-	else{
-		FH_MSG("lcm_type: NOT MIPI");
-		//disable SSC @ LVDS PLL for non-MIPI panel
-		__mt_disable_freqhopping(MT658X_FH_LVDS_PLL, NULL);
-	}
+	freqhopping_config(MT658X_FH_LVDS_PLL, 1664000, true); //Enable LVDSPLL SSC
 #endif 
 	
 }
