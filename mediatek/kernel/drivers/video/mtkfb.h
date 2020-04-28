@@ -32,6 +32,7 @@
 
 #define MTKFB_GETVFRAMEPHYSICAL MTK_IOW(44, unsigned long)
 
+#define MTKFB_CAPTURE_FRAMEBUFFER    MTK_IOW(52, unsigned long)
 #define MTKFB_CONFIG_IMMEDIATE_UPDATE   MTK_IOW(53, unsigned long)
 
 #ifdef MTK_FB_OVERLAY_SUPPORT
@@ -73,6 +74,7 @@
 #define MTKFB_BOOTANIMATION			MTK_IO(74)
 #define MTKFB_GETFPS			    MTK_IOW(77, unsigned long)
 
+#define MTKFB_META_RESTORE_SCREEN MTK_IOW(101, unsigned long)
 #define MTKFB_VSYNC MTK_IO(102)
 
 #define FBCAPS_GENERIC_MASK     0x00000fff
@@ -197,7 +199,6 @@ struct fb_overlay_layer {
     int next_buff_idx;
     int identity;
     int connected_type;
-    unsigned int security;
 };
 
 struct fb_overlay_buffer_info{

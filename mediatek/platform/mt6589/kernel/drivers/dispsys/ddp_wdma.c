@@ -119,8 +119,6 @@ int WDMAConfig(unsigned idx,
     ASSERT((WDMA_INPUT_FORMAT_ARGB == inputFormat) ||
            (WDMA_INPUT_FORMAT_YUV444 == inputFormat));    
 
-    useSpecifiedAlpha = 0;
-    
     DISP_REG_SET(idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_SRC_SIZE, srcHeight<<16 | srcWidth);
     DISP_REG_SET(idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_CLIP_COORD, clipY<<16 | clipX);
     DISP_REG_SET(idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_CLIP_SIZE, clipHeight<<16 | clipWidth);
@@ -142,13 +140,6 @@ int WDMAConfig(unsigned idx,
             rgb_swap =  0;
             uv_swap =  0;
             break;
-        case WDMA_OUTPUT_FORMAT_YUY2:
-				output_format = WDMA_OUTPUT_FORMAT_UYVY;
-				byte_swap =  1;
-				rgb_swap =	0;
-				uv_swap =  0;
-				break;
-
         case WDMA_OUTPUT_FORMAT_BGR888:
             output_format =  WDMA_OUTPUT_FORMAT_RGB888;
             byte_swap =  0;
@@ -174,7 +165,6 @@ int WDMAConfig(unsigned idx,
             uv_swap =  0;
             break;
         default:
-            printk("DDP error unknown outputFormat=%d", outputFormat);
             ASSERT(0);       // invalid format
     }
     DISP_REG_SET_FIELD(WDMA_CFG_FLD_Out_Format, idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_CFG, output_format);
@@ -184,8 +174,7 @@ int WDMAConfig(unsigned idx,
 
 
     // set DNSP for UYVY and YUV_3P format for better quality
-    if(outputFormat==WDMA_OUTPUT_FORMAT_YUY2 ||
-		outputFormat==WDMA_OUTPUT_FORMAT_UYVY ||
+    if(outputFormat==WDMA_OUTPUT_FORMAT_UYVY ||
        outputFormat==WDMA_OUTPUT_FORMAT_YUV420_P)
     {
        DISP_REG_SET_FIELD(WDMA_CFG_FLD_DNSP_SEL, idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_CFG, 1);
@@ -203,7 +192,6 @@ int WDMAConfig(unsigned idx,
             input_color_space = WDMA_COLOR_SPACE_YUV;
             break;
         default:
-            printk("DDP error unknown input format=%d \n", inputFormat);
             ASSERT(0);
     }
 
@@ -218,15 +206,13 @@ int WDMAConfig(unsigned idx,
         case WDMA_OUTPUT_FORMAT_RGBA:
             output_color_space = WDMA_COLOR_SPACE_RGB;
             break;
-        case WDMA_OUTPUT_FORMAT_YUY2:
-		case WDMA_OUTPUT_FORMAT_UYVY:
+        case WDMA_OUTPUT_FORMAT_UYVY:
         case WDMA_OUTPUT_FORMAT_YUV444:
         case WDMA_OUTPUT_FORMAT_UYVY_BLK:
         case WDMA_OUTPUT_FORMAT_YUV420_P:
             output_color_space = WDMA_COLOR_SPACE_YUV;
             break;
         default:
-        printk("DDP error, unknown output format=%d \n", outputFormat);
             ASSERT(0);
     }
 
@@ -270,7 +256,6 @@ int WDMAConfig(unsigned idx,
         case WDMA_OUTPUT_FORMAT_RGB565:
         case WDMA_OUTPUT_FORMAT_UYVY_BLK:
         case WDMA_OUTPUT_FORMAT_UYVY:
-			case WDMA_OUTPUT_FORMAT_YUY2:
             bpp = 2;
             break;
         case WDMA_OUTPUT_FORMAT_YUV420_P:
@@ -289,7 +274,6 @@ int WDMAConfig(unsigned idx,
             bpp = 4;
             break;
         default:
-            printk("DDP error, unknown output format \n");
             ASSERT(0);  // invalid format
     }
     DISP_REG_SET(idx*DISP_INDEX_OFFSET+DISP_REG_WDMA_DST_ADDR, dstAddress);

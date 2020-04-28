@@ -270,9 +270,6 @@ void DISP_WaitVSYNC(void);
 void DISP_InitVSYNC(unsigned int vsync_interval);
 DISP_STATUS DISP_PauseVsync(BOOL enable);
 DISP_STATUS DISP_Config_Overlay_to_Memory(unsigned int mva, int enable);
-DISP_STATUS DISP_Config_Wfd_Overlay_to_Memory(unsigned int mva, int enable);
-DISP_STATUS HDMI_Config_Overlay_to_Memory(unsigned int mva, int enable, unsigned int moutFormat);
-
 void DISP_StartConfigUpdate(void);
 
 unsigned long DISP_GetLCMIndex(void);

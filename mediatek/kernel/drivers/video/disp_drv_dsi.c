@@ -26,6 +26,7 @@ static UINT32 dsiTmpBufBpp = 0;
 extern LCM_DRIVER *lcm_drv;
 extern LCM_PARAMS *lcm_params;
 extern unsigned int is_video_mode_running;
+extern bool is_ipoh_bootup;
 typedef struct
 {
     UINT32 pa;
@@ -246,28 +247,13 @@ void init_dsi(BOOL isDsiPoweredOn)
 {
     DSI_CHECK_RET(DSI_Init(isDsiPoweredOn));
 
-	if(1 < lcm_params->dsi.compatibility_for_nvk){
-    	DSI_CHECK_RET(DSI_TXRX_Control(TRUE,                    //cksm_en
+    DSI_CHECK_RET(DSI_TXRX_Control(TRUE,                    //cksm_en
                                    TRUE,                    //ecc_en
                                    lcm_params->dsi.LANE_NUM, //ecc_en
                                    0,                       //vc_num
                                    FALSE,                   //null_packet_en
                                    FALSE,                   //err_correction_en
                                    FALSE,                   //dis_eotp_en
-								   FALSE,
-                                   0));                     //max_return_size
-//		DSI_set_noncont_clk(false,0);
-		DSI_Detect_glitch_enable(true);
-	}
-	else
-		DSI_CHECK_RET(DSI_TXRX_Control(TRUE,                    //cksm_en
-                                   TRUE,                    //ecc_en
-                                   lcm_params->dsi.LANE_NUM, //ecc_en
-                                   0,                       //vc_num
-                                   FALSE,                   //null_packet_en
-                                   FALSE,                   //err_correction_en
-                                   FALSE,                   //dis_eotp_en
-								   (BOOL)(1 - lcm_params->dsi.cont_clock),
                                    0));                     //max_return_size
 
     
@@ -298,10 +284,7 @@ void init_dsi(BOOL isDsiPoweredOn)
 
 	if(lcm_params->dsi.mode != CMD_MODE)
 	{
-		DSI_Set_VM_CMD(lcm_params);
 		DSI_Config_VDO_Timing(lcm_params);
-		if(1 < lcm_params->dsi.compatibility_for_nvk)
-			DSI_Config_VDO_FRM_Mode();
 #ifndef MT65XX_NEW_DISP
         DSI_CHECK_RET(DSI_PS_Control(lcm_params->dsi.PS, lcm_params->width * dsiTmpBufBpp));
 #endif
@@ -374,7 +357,6 @@ static DISP_STATUS dsi_init(UINT32 fbVA, UINT32 fbPA, BOOL isLcmInited)
 		DSI_SetMode(lcm_params->dsi.mode);
 
 #ifndef BUILD_UBOOT	
-#ifndef MT65XX_NEW_DISP
 		if(lcm_params->dsi.lcm_ext_te_monitor)
 		{
 			is_video_mode_running = false;
@@ -388,7 +370,7 @@ static DISP_STATUS dsi_init(UINT32 fbVA, UINT32 fbPA, BOOL isLcmInited)
 
 		if(lcm_params->dsi.lcm_int_te_monitor)
 			DSI_set_int_TE(false, lcm_params->dsi.lcm_int_te_period);			
-#endif
+
 #endif			
 	}
 #ifdef MT65XX_NEW_DISP
@@ -523,13 +505,17 @@ static DISP_STATUS dsi_enable_power(BOOL enable)
 #else	
 			if(lcm_params->dsi.pll_select == 1)
 			{
+				printk("[wwy] is_ipoh_bootup = %d\n",is_ipoh_bootup);	
+				if (!is_ipoh_bootup)
+             	{	
 					ASSERT(0 == enable_pll(LVDSPLL,"mtk_dsi"));
+				}
   		  }
 			DSI_PHY_clk_setting(lcm_params);
 			DSI_CHECK_RET(DSI_PowerOn());
 			DSI_clk_ULP_mode(0);			
 			DSI_lane0_ULP_mode(0);
-//			DSI_clk_HS_mode(1);	
+			DSI_clk_HS_mode(1);	
 #endif
 			DSI_CHECK_RET(DSI_enable_MIPI_txio(TRUE));
 
@@ -580,7 +566,12 @@ static DISP_STATUS dsi_enable_power(BOOL enable)
 			needStartDSI = true;
 			if(lcm_params->dsi.pll_select == 1)
 			{
+				printk("[wwy] is_ipoh_bootup = %d\n",is_ipoh_bootup);	
+				if (!is_ipoh_bootup)
+              	{	
 					ASSERT(0 == enable_pll(LVDSPLL,"mtk_dsi"));
+				}
+				
 			}
 			DSI_PHY_clk_setting(lcm_params);
 			DSI_CHECK_RET(DSI_PowerOn());
@@ -599,13 +590,12 @@ static DISP_STATUS dsi_enable_power(BOOL enable)
 	    } else {
 #ifndef BUILD_UBOOT
 			is_video_mode_running = false;
-#ifndef MT65XX_NEW_DISP
+
 			if(lcm_params->dsi.noncont_clock)
 				DSI_set_noncont_clk(false, lcm_params->dsi.noncont_clock_period);
 			
 			if(lcm_params->dsi.lcm_int_te_monitor)
 				DSI_set_int_TE(false, lcm_params->dsi.lcm_int_te_period);
-#endif
 #endif
 #ifndef MT65XX_NEW_DISP
 			LCD_CHECK_RET(LCD_PowerOff());		
@@ -642,7 +632,7 @@ static DISP_STATUS dsi_update_screen(BOOL isMuextLocked)
 	LCD_CHECK_RET(LCD_StartTransfer(FALSE));
 #endif
 	if (lcm_params->type==LCM_TYPE_DSI && lcm_params->dsi.mode == CMD_MODE && !DDMS_capturing) {
-//		DSI_clk_HS_mode(1);
+		DSI_clk_HS_mode(1);
 #ifdef MT65XX_NEW_DISP
         DSI_CHECK_RET(DSI_StartTransfer(isMuextLocked));
 #else
@@ -660,13 +650,13 @@ static DISP_STATUS dsi_update_screen(BOOL isMuextLocked)
 #endif
 #ifndef BUILD_UBOOT
 		is_video_mode_running = true;
-#ifndef MT65XX_NEW_DISP
+		
 		if(lcm_params->dsi.noncont_clock)
 			DSI_set_noncont_clk(true, lcm_params->dsi.noncont_clock_period);
 	
 		if(lcm_params->dsi.lcm_int_te_monitor)
 			DSI_set_int_TE(true, lcm_params->dsi.lcm_int_te_period);
-#endif
+
 #endif		
 	}
 

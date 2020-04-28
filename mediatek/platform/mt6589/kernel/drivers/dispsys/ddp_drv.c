@@ -1,38 +1,3 @@
-/* Copyright Statement:
- *
- * This software/firmware and related documentation ("MediaTek Software") are
- * protected under relevant copyright laws. The information contained herein
- * is confidential and proprietary to MediaTek Inc. and/or its licensors.
- * Without the prior written permission of MediaTek inc. and/or its licensors,
- * any reproduction, modification, use or disclosure of MediaTek Software,
- * and information contained herein, in whole or in part, shall be strictly prohibited.
- */
-/* MediaTek Inc. (C) 2012. All rights reserved.
- *
- * BY OPENING THIS FILE, RECEIVER HEREBY UNEQUIVOCALLY ACKNOWLEDGES AND AGREES
- * THAT THE SOFTWARE/FIRMWARE AND ITS DOCUMENTATIONS ("MEDIATEK SOFTWARE")
- * RECEIVED FROM MEDIATEK AND/OR ITS REPRESENTATIVES ARE PROVIDED TO RECEIVER ON
- * AN "AS-IS" BASIS ONLY. MEDIATEK EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NONINFRINGEMENT.
- * NEITHER DOES MEDIATEK PROVIDE ANY WARRANTY WHATSOEVER WITH RESPECT TO THE
- * SOFTWARE OF ANY THIRD PARTY WHICH MAY BE USED BY, INCORPORATED IN, OR
- * SUPPLIED WITH THE MEDIATEK SOFTWARE, AND RECEIVER AGREES TO LOOK ONLY TO SUCH
- * THIRD PARTY FOR ANY WARRANTY CLAIM RELATING THERETO. RECEIVER EXPRESSLY ACKNOWLEDGES
- * THAT IT IS RECEIVER'S SOLE RESPONSIBILITY TO OBTAIN FROM ANY THIRD PARTY ALL PROPER LICENSES
- * CONTAINED IN MEDIATEK SOFTWARE. MEDIATEK SHALL ALSO NOT BE RESPONSIBLE FOR ANY MEDIATEK
- * SOFTWARE RELEASES MADE TO RECEIVER'S SPECIFICATION OR TO CONFORM TO A PARTICULAR
- * STANDARD OR OPEN FORUM. RECEIVER'S SOLE AND EXCLUSIVE REMEDY AND MEDIATEK'S ENTIRE AND
- * CUMULATIVE LIABILITY WITH RESPECT TO THE MEDIATEK SOFTWARE RELEASED HEREUNDER WILL BE,
- * AT MEDIATEK'S OPTION, TO REVISE OR REPLACE THE MEDIATEK SOFTWARE AT ISSUE,
- * OR REFUND ANY SOFTWARE LICENSE FEES OR SERVICE CHARGE PAID BY RECEIVER TO
- * MEDIATEK FOR SUCH MEDIATEK SOFTWARE AT ISSUE.
- *
- * The following software/firmware and/or related documentation ("MediaTek Software")
- * have been modified by MediaTek Inc. All revisions are subject to any receiver's
- * applicable license agreements with MediaTek Inc.
- */
-
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/mm_types.h>
@@ -331,14 +296,11 @@ int disp_wait_intr(DISP_MODULE_ENUM module, unsigned int timeout_ms)
             disp_dump_reg(DISP_MODULE_SCL);
             disp_dump_reg(DISP_MODULE_WDMA0);            
         }
-        else if(module==DISP_MODULE_MUTEX1)
-        {
-        	  // HW mutex timeout has error intr, do not print register here
-        }
         else
         {
             disp_dump_reg(module);
         }
+        disp_dump_reg(DISP_MODULE_CONFIG);
 
         return -EAGAIN;        
     }
@@ -475,7 +437,6 @@ extern void wfd_source_buffer_switch(void);
 #endif
 
 //extern void hdmi_test_switch_buffer(void);
-static int ddp_bitblt_drop_frame = 0;
 
 unsigned int cnt_rdma_underflow = 1;
 unsigned int cnt_rdma_abnormal = 1;
@@ -522,10 +483,6 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
                 if(reg_val&(1<<0))
                 {
                       DISP_IRQ("IRQ: ROT frame done! \n");
-                      if(((DISP_REG_GET(DISP_REG_ROT_MON_STA_1)>>8)&0x7ff)!=1)
-                      {
-                          DISP_MSG("error: WDMA0 not idle when complete!, 0x%x \n", DISP_REG_GET(DISP_REG_WDMA_STA));
-                      }
                       g_disp_irq.irq_src |= (1<<DISP_MODULE_ROT);
                 }    
                 if(reg_val&(1<<1))
@@ -609,10 +566,6 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
                 if(reg_val&(1<<0))
                 {
                     DISP_IRQ("IRQ: WDMA0 frame done! \n");
-                    if((DISP_REG_GET(DISP_REG_WDMA_STA)&0x3ff)!=1)
-                    {
-                        DISP_MSG("error: WDMA0 not idle when complete!, 0x%x \n", DISP_REG_GET(DISP_REG_WDMA_STA));
-                    }
                     g_disp_irq.irq_src |= (1<<DISP_MODULE_WDMA0);
                 }    
                 if(reg_val&(1<<1))
@@ -639,11 +592,7 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
 					if(is_hdmi_active())
 					{
 					    hdmi_wdma1_done();
-					    ddp_bitblt_drop_frame++;
-					    if(ddp_bitblt_drop_frame%2!=0)
-					    {
-					      hdmi_update();
-					    }
+					    hdmi_update();
 					}
 #endif
 #if defined(MTK_WFD_SUPPORT)
@@ -692,7 +641,7 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
                 }
                 if(reg_val&(1<<3))
                 {
-                      //if(cnt_rdma_abnormal<100)
+                      if(cnt_rdma_abnormal<100)
                       {
                           DISP_ERR("IRQ: RDMA0 abnormal! %d times \n", cnt_rdma_abnormal);
                           cnt_rdma_abnormal++;
@@ -700,7 +649,7 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
                 }
                 if(reg_val&(1<<4))
                 {
-                      //if(cnt_rdma_underflow<100)
+                      if(cnt_rdma_underflow<100)
                       {
                           DISP_ERR("IRQ: RDMA0 underflow!%d times \n", cnt_rdma_underflow);
                           cnt_rdma_underflow++;
@@ -823,8 +772,7 @@ static /*__tcmfunc*/ irqreturn_t disp_irq_handler(int irq, void *dev_id)
                     if((DISP_REG_GET(DISP_REG_CONFIG_MUTEX_INTSTA) & (1<<(mutexID+6))) == (1<<(mutexID+6)))
                     {
                         DISP_ERR("disp_path_release_mutex() timeout! \n");
-                        disp_dump_reg(DISP_MODULE_CONFIG);
-                        //disp_irq_log_module |= (1<<DISP_MODULE_CONFIG);
+                        disp_irq_log_module |= (1<<DISP_MODULE_CONFIG);
                         
                         // print error engine
                         reg = DISP_REG_GET(DISP_REG_CONFIG_REG_COMMIT);
@@ -1210,6 +1158,27 @@ static long disp_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned lo
     DISP_DBG("cmd=0x%x, arg=0x%x \n", cmd, (unsigned int)arg);
     switch(cmd)
     {   
+        case DISP_IOCTL_WRITE_REG:
+            
+            if(copy_from_user(&wParams, (void *)arg, sizeof(DISP_WRITE_REG )))
+            {
+                DISP_ERR("DISP_IOCTL_WRITE_REG, copy_from_user failed\n");
+                return -EFAULT;
+            }
+
+            DISP_DBG("write  0x%x = 0x%x (0x%x)\n", wParams.reg, wParams.val, wParams.mask);
+            if(wParams.reg>DISPSYS_REG_ADDR_MAX || wParams.reg<DISPSYS_REG_ADDR_MIN)
+            {
+                DISP_ERR("reg write, addr invalid, addr min=0x%x, max=0x%x, addr=0x%x \n", 
+                    DISPSYS_REG_ADDR_MIN, 
+                    DISPSYS_REG_ADDR_MAX, 
+                    wParams.reg);
+                return -EFAULT;
+            }
+            
+            *(volatile unsigned int*)wParams.reg = (*(volatile unsigned int*)wParams.reg & ~wParams.mask) | (wParams.val & wParams.mask);
+            //mt65xx_reg_sync_writel(wParams.reg, value);
+            break;
             
         case DISP_IOCTL_READ_REG:
             if(copy_from_user(&rParams, (void *)arg, sizeof(DISP_READ_REG)))
@@ -1458,6 +1427,28 @@ static long disp_unlocked_ioctl(struct file *file, unsigned int cmd, unsigned lo
                 DISP_ERR("disp driver : Copy to user error (result)\n");
                 return -EFAULT;            
             }
+            break;
+
+        case DISP_IOCTL_GET_OVL:
+            DISP_DBG("DISP_IOCTL_GET_OVL! \n");
+            if(copy_from_user(&ovl_info, (void*)arg , sizeof(DISP_OVL_INFO)))
+            {
+                DISP_ERR("DISP_IOCTL_SET_INTR, copy_from_user failed, %d\n", ret);
+                return -EFAULT;
+            } 
+
+            layer = ovl_info.layer;
+            
+            spin_lock(&gOvlLock);
+            ovl_info = disp_layer_info[layer];
+            spin_unlock(&gOvlLock);
+            
+            if(copy_to_user((void *)arg, &ovl_info, sizeof(DISP_OVL_INFO)))
+            {
+                DISP_ERR("disp driver : Copy to user error (result)\n");
+                return -EFAULT;            
+            }
+            
             break;
 
         case DISP_IOCTL_AAL_EVENTCTL:
