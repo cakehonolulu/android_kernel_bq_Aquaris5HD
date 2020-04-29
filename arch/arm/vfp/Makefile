@@ -7,7 +7,11 @@
 # ccflags-y := -DDEBUG
 # asflags-y := -DDEBUG
 
+ifeq ($(CONFIG_ARCH_MT6589),y)
 KBUILD_AFLAGS	:=$(KBUILD_AFLAGS:-msoft-float=-Wa,-mfpu=neon-vfpv4 -mfloat-abi=soft)
+else
+KBUILD_AFLAGS	:=$(KBUILD_AFLAGS:-msoft-float=-Wa,-mfpu=softvfp-vfpv4 -mfloat-abi=soft)
+endif
 LDFLAGS		+=--no-warn-mismatch
 
 obj-y			+= vfp.o
