@@ -374,8 +374,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		   -funsafe-math-optimizations \
-		   -march=armv7-a \
-		   -mtune=cortex-a7 \
+		   -mcpu=cortex-a7 \
 		   -mfpu=neon-vfpv4
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
