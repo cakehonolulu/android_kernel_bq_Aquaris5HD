@@ -64,7 +64,11 @@ obj-$(CONFIG_HAVE_TCM)		+= tcm.o
 obj-$(CONFIG_OF)		+= devtree.o
 obj-$(CONFIG_CRASH_DUMP)	+= crash_dump.o
 obj-$(CONFIG_SWP_EMULATE)	+= swp_emulate.o
+ifeq ($(CONFIG_ARCH_MT6589),y)
+CFLAGS_swp_emulate.o		:= -Wa,-mcpu=cortex-a7
+else
 CFLAGS_swp_emulate.o		:= -Wa,-march=armv7-a
+endif
 obj-$(CONFIG_HAVE_HW_BREAKPOINT)	+= hw_breakpoint.o
 
 obj-$(CONFIG_CPU_XSCALE)	+= xscale-cp0.o
