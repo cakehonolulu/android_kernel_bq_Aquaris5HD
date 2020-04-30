@@ -2278,48 +2278,27 @@ musb_gadget_set_self_powered(struct usb_gadget *gadget, int is_selfpowered)
 
 static void musb_pullup(struct musb *musb, int is_on)
 {
-	static int first_enable = 0;
-
-/*	u8 power;
-
-	power = musb_readb(musb->mregs, MUSB_POWER);
-	if (is_on)
-		power |= MUSB_POWER_SOFTCONN;
-	else
-		power &= ~MUSB_POWER_SOFTCONN;
-
-	DBG(3, "gadget %s D+ pullup %s\n",
-		musb->gadget_driver->function, is_on ? "on" : "off");
-	musb_writeb(musb->mregs, MUSB_POWER, power);*/
-
-	/* This is a workaround to check if need to turn on USB */
-	/* The init.usb.rc would always write enable to 1 when device booting */
-#if 0
-	if (unlikely(first_enable == 0 && is_on)) {
-		first_enable++;
-		if (!is_usb_connected()) {
-		    DBG(0, "no USB cable, don't need to turn on USB\n");
-		    return;
-		}
-	}
-#else
-	if (!is_usb_connected()&& is_on) {
-		DBG(0, "no USB cable, don't need to turn on USB\n");
-		return;
-	}
-#endif
-	down(&musb->musb_lock);
+	u8 power;
 
 	DBG(0,"MUSB: gadget pull up %d start\n", is_on);
 
-	if (is_on)
-		musb_start(musb);
-	else
-		musb_stop(musb);
-
-	DBG(0,"MUSB: gadget pull up %d end\n", is_on);
-
-	up(&musb->musb_lock);
+	if (musb->power) {
+		power = musb_readb(musb->mregs, MUSB_POWER);
+		if (is_on)
+			power |= MUSB_POWER_SOFTCONN;
+		else
+			power &= ~MUSB_POWER_SOFTCONN;
+		musb_writeb(musb->mregs, MUSB_POWER, power);
+ 	} else {
+	if (!usb_in && is_on) {
+			DBG(0, "no USB cable, don't need to turn on USB\n");
+		} else if (musb->is_host) {
+			DBG(0, "USB is host, don't need to control USB\n");
+		} else if (is_on) {
+			musb_start(musb);
+		} else {
+			musb_stop(musb);
+		}
 }
 
 
