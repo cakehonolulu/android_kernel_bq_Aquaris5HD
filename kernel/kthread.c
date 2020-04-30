@@ -466,8 +466,6 @@ retry:
 }
 EXPORT_SYMBOL_GPL(flush_kthread_work);
 
-=======
->>>>>>> 34b6567e91b3... kthread_worker: reorganize to prepare for flush_kthread_work() reimplementation
 /**
  * flush_kthread_worker - flush all current works on a kthread_worker
  * @worker: worker to flush
