@@ -178,24 +178,24 @@ if [ $? -ne 0 ]; then exit 1; fi
 
 echo "**** Successfully built kernel ****"
 
-mkimg="${MTK_ROOT_BUILD}/tools/mkimage"
+#mkimg="${MTK_ROOT_BUILD}/tools/mkimage"
 # cakehonolulu: Disable out/ building style
 #if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
 #  kernel_img="${outdir}/arch/arm/boot/Image"
 #  kernel_zimg="${outdir}/arch/arm/boot/zImage"
 #else
-kernel_img="${curdir}/arch/arm/boot/Image"
-kernel_zimg="${curdir}/arch/arm/boot/zImage"
+#kernel_img="${curdir}/arch/arm/boot/Image"
+#kernel_zimg="${curdir}/arch/arm/boot/zImage"
 #fi
 
-echo "**** Generate download images ****"
+#echo "**** Generate download images ****"
 
-if [ ! -x ${mkimg} ]; then chmod a+x ${mkimg}; fi
+#if [ ! -x ${mkimg} ]; then chmod a+x ${mkimg}; fi
 # cakehonolulu: Disable out/ building style
 #if [ "${KBUILD_OUTPUT_SUPPORT}" == "yes" ]; then
 #  ${mkimg} ${kernel_zimg} KERNEL > out/kernel_${MTK_PROJECT}.bin
 #else
-  ${mkimg} ${kernel_zimg} KERNEL > kernel_${MTK_PROJECT}.bin
+#  ${mkimg} ${kernel_zimg} KERNEL > kernel_${MTK_PROJECT}.bin
 #fi
 
-copy_to_legacy_download_flash_folder   kernel_${MTK_PROJECT}.bin rootfs_${MTK_PROJECT}.bin
+#copy_to_legacy_download_flash_folder   kernel_${MTK_PROJECT}.bin rootfs_${MTK_PROJECT}.bin
