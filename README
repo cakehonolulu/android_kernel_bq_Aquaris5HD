@@ -25,3 +25,25 @@ Mediatek kernel
 To build the kernel for the bq Aquaris 5 HD's MT6589 ARM phone, we need to
 feed the build system a few environment variables:
 
+First and foremost, we need to configure the cross-compiler path:
+
+``export PATH=path_to_your_cross_compiler/bin/:${PATH}``
+
+``export CROSS_COMPILE=cross-compiler-prefix-``
+
+My personal recommendation is to use arm-eabi-4.7 or any armv7-specific compiler
+
+If you use the recomendations above; the variables should look something like this:
+
+``export PATH=arm-eabi-4.7/bin/:${PATH}``
+
+``export CROSS_COMPILE=arm-eabi-``
+
+Afterwards, we need to set the target board config for compilation; in our case ``lcs89_we_jb2``:
+
+``export TARGET_KERNEL_PRODUCT=lcsh89_we_jb2``
+
+Then, it's as easy as: ``./build.sh``
+
+Kernel should be left @ ``arch/arm/boot/zImage``
+
