@@ -31,7 +31,8 @@ CONFIG_HAVE_ARCH_KGDB=y
 #
 # Kernel .config support
 #
-# CONFIG_IKCONFIG is not set
+CONFIG_IKCONFIG=y
+CONFIG_IKCONFIG_PROC=y
 
 CONFIG_PANIC_TIMEOUT=1
 
@@ -59,7 +60,7 @@ CONFIG_CMDLINE="console=ttyMT3,921600n1 vmalloc=530M slub_max_order=0 androidboo
 #
 # Kernel hacking
 #
-# CONFIG_MAGIC_SYSRQ is not set
+CONFIG_MAGIC_SYSRQ=y
 # CONFIG_DEBUG_BUGVERBOSE is not set
 
 # CONFIG_PROFILING is not set
@@ -104,8 +105,8 @@ CONFIG_CMDLINE="console=ttyMT3,921600n1 vmalloc=530M slub_max_order=0 androidboo
 
 
 # Prove Locking
-# CONFIG_DEBUG_MUTEXES is not set
-# CONFIG_DEBUG_LOCK_ALLOC is not set
-# CONFIG_PROVE_LOCKING is not set
+CONFIG_DEBUG_MUTEXES=y
+CONFIG_DEBUG_LOCK_ALLOC=y
+CONFIG_PROVE_LOCKING=y
 # CONFIG_LOCKDEP is not set
 # CONFIG_DEBUG_LOCKDEP is not set

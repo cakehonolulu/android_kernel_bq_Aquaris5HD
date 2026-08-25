@@ -199,7 +199,29 @@ struct fb_overlay_layer {
     int next_buff_idx;
     int identity;
     int connected_type;
+    unsigned int security;
 };
+
+struct fb_overlay_layer_info_kk {
+    unsigned int layer_id;
+    unsigned int layer_enabled;   /* inserted in KK */
+    unsigned int curr_en;
+    unsigned int next_en;
+    unsigned int hw_en;
+    unsigned int curr_idx;
+    unsigned int next_idx;
+    unsigned int hw_idx;
+    unsigned int curr_identity;
+    unsigned int next_identity;
+    unsigned int hw_identity;
+    int curr_conn_type;
+    int next_conn_type;
+    int hw_conn_type;
+    MTK_FB_ORIENTATION layer_rotation;  /* appended in KK */
+};
+
+#define MTKFB_GET_DISPLAY_IF_INFORMATION_KK  MTK_IOR(22, mtk_dispif_info_kk_t)
+#define MTKFB_GET_OVERLAY_LAYER_INFO_KK      MTK_IOR(24, struct fb_overlay_layer_info_kk)
 
 struct fb_overlay_buffer_info{
 	unsigned int src_vir_addr;

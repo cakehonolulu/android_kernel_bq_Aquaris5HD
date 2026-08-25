@@ -38,6 +38,8 @@
 #include "../smi/smi_common.h"
 #include <ddp_reg.h>
 
+#include <linux/proc_fs.h>
+
 #include <linux/m4u_profile.h>
 
 
@@ -1594,6 +1596,10 @@ static int m4u_probe(struct platform_device *pdev)
     }
     m4uDevice = device_create(pM4uClass, NULL, g_MTKM4Udevno, NULL, M4U_DEVNAME);
 
+    /* KK-era userspace (libm4u.so) opens /proc/M4U_device instead */
+    if (!proc_create(M4U_DEVNAME, 0666, NULL, &g_stMTK_M4U_fops))
+        M4UMSG("proc_create %s failed\n", M4U_DEVNAME);
+
     pmodule_current_size = (int*)kmalloc(M4U_CLIENT_MODULE_NUM*4, GFP_KERNEL|__GFP_ZERO);
     pmodule_max_size = (int*)kmalloc(M4U_CLIENT_MODULE_NUM*4, GFP_KERNEL|__GFP_ZERO);
     pmodule_locked_pages = (int*)kmalloc(M4U_CLIENT_MODULE_NUM*4, GFP_KERNEL|__GFP_ZERO);
@@ -1657,6 +1663,8 @@ static int m4u_remove(struct platform_device *pdev)
     
     cdev_del(g_pMTKM4U_CharDrv);
     unregister_chrdev_region(g_MTKM4Udevno, 1);
+
+    remove_proc_entry(M4U_DEVNAME, NULL);
 
     //Release IRQ
     free_irq(MT6589_MMU0_IRQ_ID , NULL);

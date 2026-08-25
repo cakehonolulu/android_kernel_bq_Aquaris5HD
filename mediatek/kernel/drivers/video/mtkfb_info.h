@@ -48,6 +48,22 @@ typedef struct mtk_dispif_info {
 	unsigned int isConnected;
 } mtk_dispif_info_t;
 
+typedef struct mtk_dispif_info_kk {
+	unsigned int display_id;
+	unsigned int isHwVsyncAvailable;
+	MTKFB_DISPIF_TYPE displayType;
+	unsigned int displayWidth;
+	unsigned int displayHeight;
+	unsigned int displayFormat;
+    MTKFB_DISPIF_MODE displayMode;
+    unsigned int vsyncFPS;
+    unsigned int physicalWidth;      /* was xDPI */
+    unsigned int physicalHeight;     /* was yDPI */
+    unsigned int isConnected;
+    unsigned int lcmOriginalWidth;   /* new in KK */
+    unsigned int lcmOriginalHeight;  /* new in KK */
+} mtk_dispif_info_kk_t;
+
 #ifdef __cplusplus
 }
 #endif

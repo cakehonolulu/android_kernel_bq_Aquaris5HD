@@ -499,3 +499,7 @@ static int __init oops_setup(char *s)
 	return 0;
 }
 early_param("oops", oops_setup);
+
+
+void aee_kernel_dal_api(const char *file, const int line, const char *msg) {}
+EXPORT_SYMBOL(aee_kernel_dal_api);

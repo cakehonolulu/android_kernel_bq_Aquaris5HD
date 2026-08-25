@@ -16,6 +16,7 @@
 #include <linux/xlog.h>
 #include <linux/mutex.h>
 #include <linux/leds-mt65xx.h>
+#include <linux/bug.h>
 
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
@@ -374,6 +375,11 @@ void mtkfb_set_lcm_inited(BOOL inited)
  */
 unsigned int _m4u_lcd_init(void)
 {
+    BUILD_BUG_ON(sizeof(mtk_dispif_info_kk_t) != 52);
+    BUILD_BUG_ON(sizeof(struct fb_overlay_layer_info_kk) != 60);
+    BUILD_BUG_ON(MTKFB_GET_DISPLAY_IF_INFORMATION_KK != 0x80344f16);
+    BUILD_BUG_ON(MTKFB_GET_OVERLAY_LAYER_INFO_KK     != 0x803c4f18);
+
 #if defined(MTK_M4U_SUPPORT)
     MTKFB_LOG("[FB driver] call _m4u_lcd_init()\n");
 	DISP_AllocUILayerMva(fb_va_m4u, &fb_mva_m4u, fb_size_m4u);
@@ -2265,6 +2271,93 @@ static int mtkfb_ioctl(struct file *file, struct fb_info *info, unsigned int cmd
 		}
 		return (r);
 	}
+        case MTKFB_GET_DISPLAY_IF_INFORMATION_KK:
+    {
+        mtk_dispif_info_kk_t kk;
+        unsigned int displayid = 0;
+
+        /* KK userspace passes display_id in as the first word */
+        if (copy_from_user(&displayid, (void __user *)arg, sizeof(displayid))) {
+            MTKFB_LOG("[FB]: copy_from_user failed! line:%d \n", __LINE__);
+            return -EFAULT;
+        }
+        if (displayid >= MTKFB_MAX_DISPLAY_COUNT) {
+            MTKFB_LOG("[FB]: invalid display id:%d \n", displayid);
+            return -EFAULT;
+        }
+
+        memset(&kk, 0, sizeof(kk));
+        kk.display_id         = dispif_info[displayid].display_id;
+        kk.isHwVsyncAvailable = dispif_info[displayid].isHwVsyncAvailable;
+        kk.displayType        = dispif_info[displayid].displayType;
+        kk.displayWidth       = dispif_info[displayid].displayWidth;
+        kk.displayHeight      = dispif_info[displayid].displayHeight;
+        kk.displayFormat      = dispif_info[displayid].displayFormat;
+        kk.displayMode        = dispif_info[displayid].displayMode;
+        kk.vsyncFPS           = dispif_info[displayid].vsyncFPS;
+        kk.isConnected        = dispif_info[displayid].isConnected;
+
+        /* KK reports physical panel size in mm; JB only stores DPI.
+         * mm = pixels * 25.4 / dpi  */
+        kk.physicalWidth  = dispif_info[displayid].xDPI ?
+            (dispif_info[displayid].displayWidth  * 254u) /
+            (dispif_info[displayid].xDPI * 10u) : 0;
+        kk.physicalHeight = dispif_info[displayid].yDPI ?
+            (dispif_info[displayid].displayHeight * 254u) /
+            (dispif_info[displayid].yDPI * 10u) : 0;
+
+        /* DFO multi-resolution; no DFO here, so original == current */
+        kk.lcmOriginalWidth  = dispif_info[displayid].displayWidth;
+        kk.lcmOriginalHeight = dispif_info[displayid].displayHeight;
+
+        if (copy_to_user((void __user *)arg, &kk, sizeof(kk))) {
+            MTKFB_LOG("[FB]: copy_to_user failed! line:%d \n", __LINE__);
+            return -EFAULT;
+        }
+        return 0;
+    }
+
+        case MTKFB_GET_OVERLAY_LAYER_INFO_KK:
+    {
+        struct fb_overlay_layer_info_kk kk;
+        struct fb_overlay_layer_info    jb;
+
+        if (copy_from_user(&kk, (void __user *)arg, sizeof(kk))) {
+            MTKFB_LOG("[FB]: copy_from_user failed! line:%d \n", __LINE__);
+            return -EFAULT;
+        }
+
+        memset(&jb, 0, sizeof(jb));
+        jb.layer_id = kk.layer_id;          /* the only input field */
+
+        if (mtkfb_get_overlay_layer_info(&jb) < 0) {
+            MTKFB_LOG("[FB]: Failed to get overlay layer info\n");
+            return -EFAULT;
+        }
+
+        kk.layer_id       = jb.layer_id;
+        kk.layer_enabled  = jb.curr_en;     /* KK's "TO BE DEL" duplicate */
+        kk.curr_en        = jb.curr_en;
+        kk.next_en        = jb.next_en;
+        kk.hw_en          = jb.hw_en;
+        kk.curr_idx       = jb.curr_idx;
+        kk.next_idx       = jb.next_idx;
+        kk.hw_idx         = jb.hw_idx;
+        kk.curr_identity  = jb.curr_identity;
+        kk.next_identity  = jb.next_identity;
+        kk.hw_identity    = jb.hw_identity;
+        kk.curr_conn_type = jb.curr_conn_type;
+        kk.next_conn_type = jb.next_conn_type;
+        kk.hw_conn_type   = jb.hw_conn_type;
+        kk.layer_rotation = 0;              /* JB tracks no per-layer rotation */
+
+        if (copy_to_user((void __user *)arg, &kk, sizeof(kk))) {
+            MTKFB_LOG("[FB]: copy_to_user failed! line:%d \n", __LINE__);
+            return -EFAULT;
+        }
+        return 0;
+    }
+
 	case MTKFB_POWEROFF:
    	{
 		MTKFB_FUNC();

@@ -833,4 +833,3 @@ const DISP_DRIVER *DISP_GetDriverDSI()
 
     return &DSI_DISP_DRV;
 }
-
